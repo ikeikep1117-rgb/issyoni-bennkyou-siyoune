@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>学習管理ダッシュボード</title>
+<title>Study Planner</title>
+<link rel="icon" type="image/png" href="study-planner-icon.png">
+<link rel="apple-touch-icon" href="study-planner-icon.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
@@ -54,7 +56,8 @@ body{font-family:-apple-system,'Hiragino Kaku Gothic ProN','Hiragino Sans','Noto
 /* ─── Header ─── */
 .hdr{background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm);}
 .hdr-in{max-width:1100px;margin:0 auto;padding:0 1rem;height:56px;display:flex;align-items:center;gap:10px;}
-.logo{width:32px;height:32px;border-radius:var(--r8);background:var(--grad1);color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;box-shadow:0 2px 8px rgba(37,99,235,0.35);}
+.logo{width:32px;height:32px;border-radius:var(--r8);overflow:hidden;flex-shrink:0;box-shadow:0 2px 8px rgba(37,99,235,0.35);}
+.logo img{width:100%;height:100%;display:block;object-fit:cover;}
 .logo-t{font-size:15px;font-weight:700;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.02em;}
 .nav-tabs{display:flex;gap:2px;margin-left:auto;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 .nav-tabs::-webkit-scrollbar{display:none;}
@@ -218,8 +221,10 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 /* ─── Unit progress ─── */
 .unit-list{margin-top:.75rem;}
 .unit-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--r8);background:var(--surf2);margin-bottom:4px;border:1px solid var(--border);}
-.unit-name{font-size:13px;font-weight:500;flex:1;color:var(--ink2);}
-.unit-status-sel{font-size:12px;padding:4px 8px;border-radius:100px;border:1px solid var(--border2);background:#fff;cursor:pointer;font-family:inherit;color:var(--ink2);min-width:74px;appearance:none;text-align:center;font-weight:600;}
+.unit-name{font-size:13px;font-weight:500;flex:1;min-width:0;color:var(--ink2);writing-mode:horizontal-tb;word-break:break-word;overflow-wrap:anywhere;}
+.unit-toggle[aria-expanded="true"] i{transform:rotate(180deg);}
+.unit-toggle i{transition:transform .15s;}
+.unit-status-sel{width:auto;flex-shrink:0;font-size:12px;padding:4px 8px;border-radius:100px;border:1px solid var(--border2);background:#fff;cursor:pointer;font-family:inherit;color:var(--ink2);min-width:74px;appearance:none;text-align:center;font-weight:600;}
 .unit-status-sel.done{background:var(--green-bg);color:var(--green);border-color:rgba(5,150,105,.2);}
 .unit-status-sel.progress{background:var(--acc-bg2);color:var(--blue);border-color:rgba(37,99,235,.2);}
 .unit-del-btn{width:22px;height:22px;border-radius:50%;border:1px solid rgba(220,38,38,.2);background:none;color:var(--red);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;flex-shrink:0;}
@@ -345,8 +350,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
 <header class="hdr">
 <div class="hdr-in">
-  <div class="logo"><i class="ti ti-notebook" aria-hidden="true"></i></div>
-  <span class="logo-t">学習管理</span>
+  <div class="logo"><img src="study-planner-icon.png" alt=""></div>
+  <span class="logo-t">Study Planner</span>
   <div class="nav-tabs">
     <button class="ntab active" id="nav-dash" onclick="switchTab('dash')"><i class="ti ti-home" aria-hidden="true"></i><span>ホーム</span></button>
     <button class="ntab" id="nav-scores" onclick="switchTab('scores')"><i class="ti ti-chart-bar" aria-hidden="true"></i><span>成績</span></button>
@@ -1108,12 +1113,12 @@ function renderSubjectTable(){
     const ga=ex.gradeAvgs[s]!==undefined?ex.gradeAvgs[s]:'';
     const diff=(score!==''&&ga!=='')?(parseFloat(score)-parseFloat(ga)):null;
     const diffHtml=diff!==null?`<span class="diff-chip ${diff>0?'diff-pos':diff<0?'diff-neg':'diff-zero'}">${diff>0?'+':''}${diff.toFixed(1)}</span>`:`<span class="diff-chip diff-zero">—</span>`;
-    return `<tr class="${hidden?'subj-hidden-row':''}">
+    return `<tr class="${hidden?'subj-hidden-row':''}" data-subject="${esc(s)}">
       <td>${esc(s)}</td>
       <td>${hidden?'<span style="color:var(--ink4);">—</span>':`<input class="score-inp-t" type="number" min="0" max="100" value="${esc(String(score))}" placeholder="—" oninput="updateSubjScore('${esc(s)}',this.value)">`}</td>
       <td>${hidden?'—':`<input class="score-inp-t score-inp-avg" type="number" min="0" max="100" step=".1" value="${esc(String(ca))}" placeholder="—" oninput="updateClassAvg('${esc(s)}',this.value)">`}</td>
       <td>${hidden?'—':`<input class="score-inp-t score-inp-avg" type="number" min="0" max="100" step=".1" value="${esc(String(ga))}" placeholder="—" oninput="updateGradeAvg('${esc(s)}',this.value)">`}</td>
-      <td>${hidden?'—':diffHtml}</td>
+      <td class="score-diff">${hidden?'—':diffHtml}</td>
       <td><button class="toggle-vis${hidden?' off':''}" onclick="toggleSubjHidden('${esc(s)}')">${hidden?'対象外':'対象'}</button></td>
       <td><button class="btn btn-s btn-d" onclick="deleteSubject('${esc(s)}')" title="削除"><i class="ti ti-trash" aria-hidden="true"></i></button></td>
     </tr>`;
@@ -1121,9 +1126,28 @@ function renderSubjectTable(){
 }
 
 function toggleSubjHidden(name){const ex=getExam();ex.hidden[name]=!ex.hidden[name];renderSubjectTable();}
-function updateSubjScore(name,val){getExam().subjects[name]=val;renderSubjectTable();}
-function updateClassAvg(name,val){getExam().classAvgs[name]=val;renderSubjectTable();}
-function updateGradeAvg(name,val){getExam().gradeAvgs[name]=val;renderSubjectTable();}
+function updateScoreDiff(name){
+  const ex=getExam();
+  const score=ex.subjects[name];
+  const gradeAvg=ex.gradeAvgs[name];
+  const row=[...document.querySelectorAll('#subjectTableBody tr')].find(r=>r.dataset.subject===name);
+  const cell=row?.querySelector('.score-diff');
+  if(!cell)return;
+  if(score===''||gradeAvg===''){
+    cell.innerHTML='<span class="diff-chip diff-zero">—</span>';
+    return;
+  }
+  const diff=parseFloat(score)-parseFloat(gradeAvg);
+  if(!Number.isFinite(diff)){
+    cell.innerHTML='<span class="diff-chip diff-zero">—</span>';
+    return;
+  }
+  const cls=diff>0?'diff-pos':diff<0?'diff-neg':'diff-zero';
+  cell.innerHTML=`<span class="diff-chip ${cls}">${diff>0?'+':''}${diff.toFixed(1)}</span>`;
+}
+function updateSubjScore(name,val){getExam().subjects[name]=val;updateScoreDiff(name);}
+function updateClassAvg(name,val){getExam().classAvgs[name]=val;}
+function updateGradeAvg(name,val){getExam().gradeAvgs[name]=val;updateScoreDiff(name);}
 
 function addSubject(){
   const inp=document.getElementById('newSubjInput');
@@ -1758,6 +1782,7 @@ function renderDayEvents(){
 let pendingPhoto=null, dragSrcId=null;
 let booksSection='owned'; // 'owned' | 'wish'
 let unitFormBookId=null;
+const expandedUnitBookIds=new Set();
 
 function setBooksSection(section){
   booksSection=section;
@@ -1795,7 +1820,10 @@ function addBook(){
 function deleteBook(id){
   const idx=S.books.findIndex(b=>b.id===id);if(idx<0)return;
   if(!confirm(`「${S.books[idx].title}」を削除しますか？`))return;
-  S.books.splice(idx,1);save();renderBooks();
+  S.books.splice(idx,1);
+  expandedUnitBookIds.delete(id);
+  if(unitFormBookId===id)closeUnitForm();
+  save();renderBooks();
 }
 function moveBookToOwned(id){
   const b=S.books.find(b=>b.id===id);if(!b)return;
@@ -1816,8 +1844,9 @@ function renderBooks(){
     const units=b.units||[];
     const doneCount=units.filter(u=>u.status==='done').length;
     const pct=units.length?Math.round(doneCount/units.length*100):0;
-    return `<div class="book-card" data-id="${b.id}" draggable="true"
-      ondragstart="bDs(event,${b.id})" ondragover="bDo(event,${b.id})" ondragleave="bDl(event)" ondrop="bDrop(event,${b.id})">
+    const unitsExpanded=expandedUnitBookIds.has(b.id);
+    return `<div class="book-card" data-id="${b.id}"
+      ondragover="bDo(event,${b.id})" ondragleave="bDl(event)" ondrop="bDrop(event,${b.id})">
       <div class="rank-c">${i+1}</div>
       <div class="book-cover">${b.photo?`<img src="${b.photo}" alt="${esc(b.title)}">`:`<i class="ti ti-book-2" aria-hidden="true"></i>`}</div>
       <div class="book-body">
@@ -1830,7 +1859,7 @@ function renderBooks(){
               <div class="prog-label" style="margin-bottom:4px;"><span>進捗</span><span>${doneCount} / ${units.length} ユニット完了（${pct}%）</span></div>
               <div class="prog-bar"><div class="prog-fill green" style="width:${pct}%;"></div></div>
             </div>
-            <div class="unit-list">
+            ${unitsExpanded?`<div class="unit-list">
               ${units.map(u=>`<div class="unit-item">
                 <span class="unit-name">${esc(u.name)}</span>
                 <select class="unit-status-sel ${u.status==='done'?'done':u.status==='progress'?'progress':''}" onchange="updateUnitStatus(${b.id},${u.id},this.value)">
@@ -1838,23 +1867,31 @@ function renderBooks(){
                   <option value="progress" ${u.status==='progress'?'selected':''}>学習中</option>
                   <option value="done" ${u.status==='done'?'selected':''}>完了</option>
                 </select>
-                <button class="unit-del-btn" onclick="deleteUnit(${b.id},${u.id})"><i class="ti ti-x" aria-hidden="true"></i></button>
+                <button class="unit-del-btn" type="button" aria-label="${esc(u.name)}を削除" onclick="event.stopPropagation();deleteUnit(${b.id},${u.id})"><i class="ti ti-x" aria-hidden="true"></i></button>
               </div>`).join('')}
-            </div>
+            </div>`:''}
           `:''}
         `:''}
         <div class="book-actions">
-          ${booksSection==='owned'?`<button class="btn btn-s" onclick="openUnitForm(${b.id})"><i class="ti ti-list-details" aria-hidden="true"></i>ユニット追加</button>`:`<button class="btn btn-s btn-t" onclick="moveBookToOwned(${b.id})"><i class="ti ti-shopping-cart-check" aria-hidden="true"></i>購入済みに移動</button>`}
-          <button class="btn btn-s btn-d" onclick="deleteBook(${b.id})"><i class="ti ti-trash" aria-hidden="true"></i>削除</button>
+          ${booksSection==='owned'?`
+            <button class="btn btn-s unit-toggle" type="button" aria-expanded="${unitsExpanded}" onclick="event.stopPropagation();toggleUnits(${b.id})"><i class="ti ti-chevron-down" aria-hidden="true"></i>ユニット${units.length?` (${units.length})`:''}</button>
+            <button class="btn btn-s" type="button" onclick="event.stopPropagation();openUnitForm(${b.id})"><i class="ti ti-plus" aria-hidden="true"></i>追加</button>
+          `:`<button class="btn btn-s btn-t" type="button" onclick="event.stopPropagation();moveBookToOwned(${b.id})"><i class="ti ti-shopping-cart-check" aria-hidden="true"></i>購入済みに移動</button>`}
+          <button class="btn btn-s btn-d" type="button" onclick="event.stopPropagation();deleteBook(${b.id})"><i class="ti ti-trash" aria-hidden="true"></i>削除</button>
         </div>
       </div>
-      <div class="drag-h" title="ドラッグして並び替え"><i class="ti ti-grip-vertical" aria-hidden="true"></i></div>
+      <div class="drag-h" draggable="true" ondragstart="bDs(event,${b.id})" title="ドラッグして並び替え"><i class="ti ti-grip-vertical" aria-hidden="true"></i></div>
     </div>`;
   }).join('');
   setupTouchDrag();
 }
 
 /* ── Units ── */
+function toggleUnits(bookId){
+  if(expandedUnitBookIds.has(bookId))expandedUnitBookIds.delete(bookId);
+  else expandedUnitBookIds.add(bookId);
+  renderBooks();
+}
 function openUnitForm(bookId){
   unitFormBookId=bookId;
   const f=document.getElementById('addUnitForm');
@@ -1887,7 +1924,7 @@ function deleteUnit(bookId,unitId){
 }
 
 /* ── Drag & drop ── */
-function bDs(e,id){dragSrcId=id;e.dataTransfer.effectAllowed='move';e.currentTarget.classList.add('dragging');}
+function bDs(e,id){dragSrcId=id;e.dataTransfer.effectAllowed='move';e.currentTarget.closest('.book-card').classList.add('dragging');}
 function bDo(e,id){e.preventDefault();document.querySelectorAll('.book-card').forEach(c=>c.classList.remove('drag-over'));e.currentTarget.classList.add('drag-over');}
 function bDl(e){e.currentTarget.classList.remove('drag-over');}
 function bDrop(e,id){
