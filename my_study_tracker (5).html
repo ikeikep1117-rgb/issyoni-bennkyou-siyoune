@@ -1,0 +1,1938 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>学習管理ダッシュボード</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --white:#FFFFFF;
+  --bg:#F0F4FF;
+  --bg2:#E8EEFF;
+  --surf:#FFFFFF;
+  --surf2:#F5F7FF;
+  --surf3:#EEF1FF;
+  --border:rgba(99,120,210,0.12);
+  --border2:rgba(99,120,210,0.22);
+  --ink:#0A0F2E;
+  --ink2:#3D4A7A;
+  --ink3:#7B8AB8;
+  --ink4:#B0BBDD;
+  --blue:#2563EB;
+  --blue2:#1D4ED8;
+  --blue3:#60A5FA;
+  --sky:#0EA5E9;
+  --sky2:#38BDF8;
+  --cyan:#06B6D4;
+  --indigo:#4F46E5;
+  --acc:#2563EB;
+  --acc-bg:#EFF6FF;
+  --acc-bg2:#DBEAFE;
+  --green:#059669;
+  --green-bg:#D1FAE5;
+  --amber:#D97706;
+  --amber-bg:#FEF3C7;
+  --red:#DC2626;
+  --red-bg:#FEE2E2;
+  --orange:#EA580C;
+  --orange-bg:#FFEDD5;
+  --purple:#7C3AED;
+  --purple-bg:#EDE9FE;
+  --grad1:linear-gradient(135deg,#2563EB,#0EA5E9);
+  --grad2:linear-gradient(135deg,#4F46E5,#2563EB);
+  --grad3:linear-gradient(135deg,#0EA5E9,#06B6D4);
+  --shadow-sm:0 1px 3px rgba(37,99,235,0.08),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 16px rgba(37,99,235,0.1),0 2px 6px rgba(0,0,0,0.04);
+  --shadow-lg:0 8px 32px rgba(37,99,235,0.14),0 4px 12px rgba(0,0,0,0.06);
+  --r4:4px;--r8:8px;--r12:12px;--r16:16px;--r20:20px;--r24:24px;
+}
+body{font-family:-apple-system,'Hiragino Kaku Gothic ProN','Hiragino Sans','Noto Sans JP',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased;}
+
+/* ─── Header ─── */
+.hdr{background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm);}
+.hdr-in{max-width:1100px;margin:0 auto;padding:0 1rem;height:56px;display:flex;align-items:center;gap:10px;}
+.logo{width:32px;height:32px;border-radius:var(--r8);background:var(--grad1);color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;box-shadow:0 2px 8px rgba(37,99,235,0.35);}
+.logo-t{font-size:15px;font-weight:700;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.02em;}
+.nav-tabs{display:flex;gap:2px;margin-left:auto;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.ntab{display:flex;align-items:center;gap:4px;padding:5px 11px;border-radius:var(--r8);border:none;background:none;font-size:12px;font-weight:500;color:var(--ink3);cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;transition:all .15s;letter-spacing:.01em;}
+.ntab i{font-size:15px;}
+.ntab:hover{background:var(--surf2);color:var(--ink2);}
+.ntab.active{background:var(--acc-bg2);color:var(--blue);font-weight:600;}
+
+/* ─── Page ─── */
+.page{max-width:1100px;margin:0 auto;padding:1.5rem 1rem 5rem;display:none;}
+.page.active{display:block;}
+.pg-title{font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-.03em;margin-bottom:.25rem;}
+.pg-sub{font-size:13px;color:var(--ink3);margin-bottom:1.5rem;}
+.sec-t{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:.6rem;padding-left:2px;}
+
+/* ─── Card ─── */
+.card{background:var(--surf);border:1px solid var(--border);border-radius:var(--r16);overflow:hidden;margin-bottom:1rem;box-shadow:var(--shadow-sm);}
+.card:hover{box-shadow:var(--shadow-md);}
+.ch{padding:.9rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.ch-t{font-size:14px;font-weight:700;color:var(--ink);}
+.cb{padding:1.25rem;}
+
+/* ─── Gradient card ─── */
+.grad-card{border-radius:var(--r20);padding:1.5rem;color:#fff;margin-bottom:1rem;box-shadow:var(--shadow-lg);}
+.grad-card.blue{background:var(--grad1);}
+.grad-card.indigo{background:var(--grad2);}
+.grad-card.sky{background:var(--grad3);}
+
+/* ─── Buttons ─── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border-radius:var(--r8);border:1.5px solid var(--border2);background:var(--surf);font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;letter-spacing:.01em;}
+.btn:hover{background:var(--surf2);border-color:var(--blue3);color:var(--blue);}
+.btn:active{transform:scale(.97);}
+.btn i{font-size:14px;}
+.btn-p{background:var(--grad1);border-color:transparent;color:#fff;box-shadow:0 2px 8px rgba(37,99,235,0.3);}
+.btn-p:hover{background:var(--grad2);border-color:transparent;color:#fff;box-shadow:0 4px 12px rgba(37,99,235,0.4);}
+.btn-d{color:var(--red);border-color:rgba(220,38,38,.2);}
+.btn-d:hover{background:var(--red-bg);border-color:var(--red);color:var(--red);}
+.btn-t{background:linear-gradient(135deg,var(--green),#10B981);border-color:transparent;color:#fff;}
+.btn-t:hover{opacity:.9;color:#fff;}
+.btn-sky{background:var(--grad3);border-color:transparent;color:#fff;}
+.btn-sky:hover{opacity:.9;color:#fff;}
+.btn-s{padding:5px 10px;font-size:12px;}
+.btn-s i{font-size:13px;}
+.btn-save{background:var(--grad1);border-color:transparent;color:#fff;width:100%;justify-content:center;padding:12px;font-size:14px;border-radius:var(--r12);box-shadow:0 2px 8px rgba(37,99,235,0.3);}
+.btn-save:hover{background:var(--grad2);border-color:transparent;color:#fff;}
+
+/* ─── Badges ─── */
+.bdg{display:inline-flex;align-items:center;padding:2px 9px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.01em;}
+.bdg-blue{background:var(--acc-bg2);color:var(--blue);}
+.bdg-sky{background:#E0F2FE;color:var(--sky);}
+.bdg-green{background:var(--green-bg);color:var(--green);}
+.bdg-amber{background:var(--amber-bg);color:var(--amber);}
+.bdg-red{background:var(--red-bg);color:var(--red);}
+.bdg-purple{background:var(--purple-bg);color:var(--purple);}
+.bdg-orange{background:var(--orange-bg);color:var(--orange);}
+.bdg-gray{background:var(--surf3);color:var(--ink3);}
+
+/* ─── Forms ─── */
+.fpanel{background:var(--surf2);border:1.5px solid var(--border2);border-radius:var(--r16);padding:1.25rem;margin-bottom:1rem;display:none;box-shadow:var(--shadow-sm);}
+.fpanel.open{display:block;}
+.fp-t{font-size:13px;font-weight:700;color:var(--blue);margin-bottom:1rem;display:flex;align-items:center;gap:6px;}
+label.fl{display:block;font-size:11px;font-weight:700;color:var(--ink2);margin-bottom:4px;margin-top:10px;letter-spacing:.03em;text-transform:uppercase;}
+label.fl:first-child{margin-top:0;}
+input[type=text],input[type=date],input[type=time],input[type=number],textarea,select{width:100%;border:1.5px solid var(--border2);border-radius:var(--r8);padding:9px 12px;font-size:14px;font-family:inherit;background:#fff;color:var(--ink);outline:none;transition:all .15s;appearance:none;-webkit-appearance:none;}
+input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,0.12);}
+textarea{resize:vertical;min-height:64px;line-height:1.6;}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237B8AB8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:36px;}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.fg4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;}
+.fa{display:flex;gap:8px;margin-top:1rem;padding-top:1rem;border-top:1.5px solid var(--border);flex-wrap:wrap;}
+.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;gap:8px;flex-wrap:wrap;}
+.tb-label{font-size:13px;color:var(--ink3);}
+.div{border:none;border-top:1px solid var(--border);margin:.75rem 0;}
+
+/* ─── Charts ─── */
+.chart-wrap{position:relative;height:220px;}
+.chart-wrap-sm{position:relative;height:180px;}
+
+/* ─── Empty ─── */
+.empty{text-align:center;padding:3rem 1rem;color:var(--ink3);}
+.empty i{font-size:44px;opacity:.25;display:block;margin-bottom:.75rem;color:var(--blue);}
+.empty-t{font-size:14px;font-weight:600;color:var(--ink2);margin-bottom:4px;}
+.empty-s{font-size:13px;}
+
+/* ─── Dashboard ─── */
+.dash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem;}
+.dash-stat{background:var(--surf);border:1px solid var(--border);border-radius:var(--r16);padding:1.1rem 1rem;text-align:center;box-shadow:var(--shadow-sm);transition:box-shadow .15s;}
+.dash-stat:hover{box-shadow:var(--shadow-md);}
+.ds-val{font-size:22px;font-weight:800;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.03em;}
+.ds-label{font-size:10px;color:var(--ink3);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-top:3px;}
+.countdown-wrap{border-radius:var(--r20);padding:1.5rem;background:var(--grad1);color:#fff;margin-bottom:1rem;box-shadow:var(--shadow-lg);text-align:center;position:relative;overflow:hidden;}
+.countdown-wrap::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(255,255,255,.08);border-radius:50%;}
+.countdown-wrap::after{content:'';position:absolute;bottom:-30px;left:-30px;width:120px;height:120px;background:rgba(255,255,255,.06);border-radius:50%;}
+.cd-label{font-size:11px;font-weight:700;opacity:.75;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.5rem;position:relative;z-index:1;}
+.cd-name{font-size:17px;font-weight:700;margin-bottom:.35rem;position:relative;z-index:1;}
+.cd-days{font-size:56px;font-weight:900;letter-spacing:-.04em;line-height:1;position:relative;z-index:1;}
+.cd-unit{font-size:15px;font-weight:600;opacity:.8;margin-top:.25rem;position:relative;z-index:1;}
+.streak-card{background:linear-gradient(135deg,var(--amber-bg),#FDE68A);border:1.5px solid rgba(217,119,6,.15);border-radius:var(--r16);padding:1rem 1.25rem;display:flex;align-items:center;gap:14px;margin-bottom:1rem;box-shadow:var(--shadow-sm);}
+.streak-num{font-size:32px;font-weight:900;color:var(--amber);}
+.streak-info{flex:1;}
+.streak-title{font-size:14px;font-weight:700;color:var(--amber);}
+.streak-sub{font-size:12px;color:var(--ink3);}
+
+/* ─── Exam tabs ─── */
+.exam-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:1.25rem;}
+.etab{padding:6px 14px;border-radius:100px;border:1.5px solid var(--border2);background:var(--surf);font-size:13px;font-weight:500;color:var(--ink2);cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;}
+.etab:hover{border-color:var(--blue3);color:var(--blue);background:var(--acc-bg);}
+.etab.active{background:var(--grad1);border-color:transparent;color:#fff;box-shadow:0 2px 8px rgba(37,99,235,0.25);}
+
+/* ─── Score table ─── */
+.score-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.score-table{width:100%;border-collapse:separate;border-spacing:0;}
+.score-table thead th{background:var(--surf3);padding:10px 8px;font-size:11px;font-weight:700;color:var(--ink2);text-align:center;letter-spacing:.04em;text-transform:uppercase;position:sticky;top:0;border-bottom:2px solid var(--border2);}
+.score-table thead th:first-child{text-align:left;border-radius:var(--r8) 0 0 0;min-width:110px;}
+.score-table thead th:last-child{border-radius:0 var(--r8) 0 0;}
+.score-table tbody tr:hover{background:var(--acc-bg);}
+.score-table tbody td{padding:9px 8px;text-align:center;border-bottom:1px solid var(--border);vertical-align:middle;}
+.score-table tbody td:first-child{text-align:left;font-size:13px;font-weight:700;color:var(--ink2);}
+.score-inp-t{width:64px;text-align:center;border:1.5px solid var(--border2);border-radius:var(--r4);padding:6px 4px;font-size:15px;font-weight:700;font-family:inherit;color:var(--ink);background:var(--surf2);outline:none;transition:all .15s;}
+.score-inp-t:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.12);background:#fff;}
+.score-inp-avg{width:58px;font-size:12px;font-weight:500;color:var(--ink2);}
+.diff-chip{display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;min-width:46px;padding:3px 6px;border-radius:var(--r4);}
+.diff-pos{background:var(--green-bg);color:var(--green);}
+.diff-neg{background:var(--red-bg);color:var(--red);}
+.diff-zero{background:var(--surf3);color:var(--ink3);}
+.subj-hidden-row{opacity:.35;}
+.toggle-vis{font-size:10px;padding:2px 7px;border-radius:100px;border:1px solid var(--border2);background:none;cursor:pointer;font-family:inherit;font-weight:600;color:var(--ink3);transition:all .12s;white-space:nowrap;}
+.toggle-vis.off{border-color:var(--blue3);color:var(--blue);background:var(--acc-bg);}
+
+/* ─── Summary row ─── */
+.sum-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem;}
+.sum-c{background:var(--surf);border:1px solid var(--border);border-radius:var(--r12);padding:.85rem .75rem;text-align:center;box-shadow:var(--shadow-sm);}
+.sum-v{font-size:18px;font-weight:800;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.02em;}
+.sum-l{font-size:10px;color:var(--ink3);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-top:2px;}
+
+/* ─── Progress bar ─── */
+.prog-bar{height:8px;background:var(--surf3);border-radius:100px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--grad1);border-radius:100px;transition:width .4s ease;}
+.prog-fill.green{background:linear-gradient(90deg,var(--green),#10B981);}
+
+/* ─── Books ─── */
+.books-section-tabs{display:flex;gap:6px;margin-bottom:1rem;}
+.bstab{padding:7px 16px;border-radius:100px;border:1.5px solid var(--border2);background:var(--surf);font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;font-family:inherit;transition:all .15s;}
+.bstab.active{background:var(--grad1);border-color:transparent;color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.25);}
+.book-card{background:var(--surf);border:1.5px solid var(--border);border-radius:var(--r16);padding:1rem 1.25rem;display:flex;gap:12px;align-items:flex-start;margin-bottom:.75rem;box-shadow:var(--shadow-sm);transition:all .15s;-webkit-user-select:none;user-select:none;}
+.book-card:hover{box-shadow:var(--shadow-md);border-color:var(--blue3);}
+.book-card.drag-over{border-color:var(--blue);background:var(--acc-bg);}
+.book-card.dragging{opacity:.4;}
+.rank-c{min-width:26px;height:26px;border-radius:50%;background:var(--grad1);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:3px;}
+.book-cover{width:54px;height:70px;border-radius:var(--r8);overflow:hidden;flex-shrink:0;background:var(--surf3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--ink4);}
+.book-cover img{width:100%;height:100%;object-fit:cover;}
+.book-body{flex:1;min-width:0;}
+.book-title{font-size:14px;font-weight:700;margin-bottom:5px;color:var(--ink);}
+.book-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;}
+.book-memo{font-size:13px;color:var(--ink2);line-height:1.6;white-space:pre-wrap;}
+.book-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.drag-h{color:var(--ink4);font-size:20px;flex-shrink:0;cursor:grab;touch-action:none;}
+.drag-h:hover{color:var(--ink2);}
+
+/* ─── Unit progress ─── */
+.unit-list{margin-top:.75rem;}
+.unit-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--r8);background:var(--surf2);margin-bottom:4px;border:1px solid var(--border);}
+.unit-name{font-size:13px;font-weight:500;flex:1;color:var(--ink2);}
+.unit-status-sel{font-size:12px;padding:4px 8px;border-radius:100px;border:1px solid var(--border2);background:#fff;cursor:pointer;font-family:inherit;color:var(--ink2);min-width:74px;appearance:none;text-align:center;font-weight:600;}
+.unit-status-sel.done{background:var(--green-bg);color:var(--green);border-color:rgba(5,150,105,.2);}
+.unit-status-sel.progress{background:var(--acc-bg2);color:var(--blue);border-color:rgba(37,99,235,.2);}
+.unit-del-btn{width:22px;height:22px;border-radius:50%;border:1px solid rgba(220,38,38,.2);background:none;color:var(--red);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;flex-shrink:0;}
+
+/* ─── Log ─── */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem;}
+.stat-c{background:var(--surf);border:1px solid var(--border);border-radius:var(--r12);padding:.85rem .75rem;text-align:center;box-shadow:var(--shadow-sm);}
+.stat-v{font-size:17px;font-weight:800;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.02em;}
+.stat-l{font-size:10px;color:var(--ink3);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-top:2px;}
+.log-item{background:var(--surf);border:1.5px solid var(--border);border-radius:var(--r16);padding:1rem 1.25rem;margin-bottom:.75rem;box-shadow:var(--shadow-sm);}
+.log-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:6px;}
+.log-date{font-size:12px;font-weight:700;color:var(--ink3);}
+.log-mat{font-size:14px;font-weight:700;color:var(--ink);}
+.log-chip{background:var(--acc-bg2);color:var(--blue);border-radius:100px;padding:3px 10px;font-size:12px;font-weight:700;}
+.log-meta{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--ink2);align-items:center;}
+.log-memo{font-size:13px;color:var(--ink2);margin-top:5px;line-height:1.55;}
+.log-actions{display:flex;gap:6px;margin-top:8px;}
+.period-tabs{display:flex;gap:4px;margin-bottom:1rem;flex-wrap:wrap;}
+.ptab{padding:5px 12px;border-radius:100px;border:1.5px solid var(--border2);background:var(--surf);font-size:12px;font-weight:500;color:var(--ink2);cursor:pointer;font-family:inherit;transition:all .15s;}
+.ptab.active{background:var(--grad1);border-color:transparent;color:#fff;}
+.rank-row{display:flex;align-items:center;gap:10px;padding:.6rem 0;border-bottom:1px solid var(--border);}
+.rank-row:last-child{border-bottom:none;}
+.rank-num-b{min-width:22px;text-align:center;font-size:13px;font-weight:800;color:var(--blue);}
+.rank-name{flex:1;font-size:13px;font-weight:600;color:var(--ink2);}
+.rank-bar-wrap{width:90px;height:6px;background:var(--surf3);border-radius:100px;overflow:hidden;}
+.rank-bar-fill{height:100%;background:var(--grad1);border-radius:100px;}
+.rank-time{font-size:12px;color:var(--ink2);font-weight:700;min-width:46px;text-align:right;}
+
+/* ─── Materials ─── */
+.mat-row{background:var(--surf);border:1.5px solid var(--border);border-radius:var(--r12);padding:.9rem 1rem;margin-bottom:.6rem;box-shadow:var(--shadow-sm);}
+.mat-header{display:flex;align-items:center;gap:8px;margin-bottom:.5rem;}
+.mat-name{font-size:14px;font-weight:700;flex:1;color:var(--ink);}
+.mat-meta{font-size:12px;color:var(--ink3);margin-bottom:.5rem;}
+.prog-label{font-size:12px;color:var(--ink2);display:flex;justify-content:space-between;margin-top:4px;}
+.prog-inputs{display:flex;gap:8px;align-items:center;margin-top:.5rem;flex-wrap:wrap;}
+.prog-inp{width:72px;border:1.5px solid var(--border2);border-radius:var(--r4);padding:5px 6px;font-size:13px;font-weight:700;font-family:inherit;text-align:center;outline:none;background:var(--surf2);color:var(--ink);}
+.prog-inp:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.1);background:#fff;}
+
+/* ─── Mock ─── */
+.mock-card{background:var(--surf);border:1.5px solid var(--border);border-radius:var(--r16);padding:1rem 1.25rem;margin-bottom:.75rem;box-shadow:var(--shadow-sm);}
+.mock-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:.75rem;}
+.mock-name{font-size:15px;font-weight:700;color:var(--ink);}
+.mock-date{font-size:12px;color:var(--ink3);}
+.mock-scores{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:.75rem;}
+.mock-sc{text-align:center;background:var(--surf2);border-radius:var(--r8);padding:.5rem .25rem;border:1px solid var(--border);}
+.mock-sv{font-size:15px;font-weight:800;color:var(--ink);}
+.mock-sl{font-size:10px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
+
+/* ─── Timer ─── */
+.timer-display{text-align:center;padding:2rem 1rem 1.5rem;}
+.timer-face{font-size:72px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1;}
+.timer-sub{font-size:14px;color:var(--ink3);margin-top:.5rem;min-height:1.5em;}
+.timer-mode-tabs{display:flex;gap:6px;justify-content:center;margin-bottom:1.5rem;}
+.timer-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:1.5rem;}
+.pomo-dots{display:flex;gap:7px;justify-content:center;margin-top:.75rem;}
+.pomo-dot{width:12px;height:12px;border-radius:50%;background:var(--surf3);border:2px solid var(--border2);transition:all .3s;}
+.pomo-dot.done{background:var(--grad1);border-color:transparent;box-shadow:0 1px 4px rgba(37,99,235,.3);}
+.timer-save-form{background:var(--surf2);border:1.5px solid var(--border2);border-radius:var(--r16);padding:1.25rem;margin-top:1rem;display:none;}
+.timer-save-form.open{display:block;}
+
+/* ─── Calendar ─── */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.cal-month{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.02em;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:1rem;}
+.cal-dow{text-align:center;font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.04em;padding:6px 0;}
+.cal-cell{border-radius:var(--r8);padding:6px 4px;min-height:70px;background:var(--surf);border:1px solid var(--border);cursor:pointer;transition:all .15s;position:relative;overflow:hidden;}
+.cal-cell:hover{border-color:var(--blue3);background:var(--acc-bg);box-shadow:var(--shadow-sm);}
+.cal-cell.today{border-color:var(--blue);border-width:2px;background:var(--acc-bg);}
+.cal-cell.other-month{opacity:.4;}
+.cal-cell.has-event::after{content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:var(--blue);}
+.cal-day-num{font-size:13px;font-weight:700;color:var(--ink);line-height:1;margin-bottom:3px;}
+.cal-cell.today .cal-day-num{background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.cal-event-dot{height:6px;border-radius:100px;margin-bottom:2px;font-size:0;}
+.event-item{background:var(--surf);border:1.5px solid var(--border);border-radius:var(--r12);padding:.85rem 1.1rem;margin-bottom:.6rem;display:flex;align-items:flex-start;gap:10px;box-shadow:var(--shadow-sm);}
+.event-color-bar{width:4px;border-radius:100px;align-self:stretch;flex-shrink:0;}
+.event-body{flex:1;}
+.event-title{font-size:14px;font-weight:700;color:var(--ink);}
+.event-meta{font-size:12px;color:var(--ink3);margin-top:2px;}
+.sub-status{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:700;cursor:pointer;}
+.sub-todo{background:var(--red-bg);color:var(--red);}
+.sub-doing{background:var(--amber-bg);color:var(--amber);}
+.sub-done{background:var(--green-bg);color:var(--green);}
+
+/* ─── Upload ─── */
+.upload-row{display:flex;align-items:center;gap:10px;margin-top:4px;}
+.upload-label{display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border:1.5px dashed var(--blue3);border-radius:var(--r8);font-size:13px;font-weight:600;color:var(--blue);cursor:pointer;background:#fff;font-family:inherit;transition:all .15s;}
+.upload-label:hover{background:var(--acc-bg);border-color:var(--blue);}
+#photoInput{display:none;}
+#photoPreview{width:50px;height:65px;border-radius:var(--r8);object-fit:cover;border:1.5px solid var(--border);display:none;}
+
+/* ─── Exam date display ─── */
+.exam-date-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:100px;background:var(--acc-bg2);color:var(--blue);font-size:12px;font-weight:700;border:1px solid rgba(37,99,235,.15);}
+
+/* ─── Rank chart pair ─── */
+.rank-chart-pair{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem;}
+
+/* ─── Range item ─── */
+.range-item{background:var(--surf2);border-radius:var(--r12);padding:.85rem 1rem;margin-bottom:.6rem;border:1px solid var(--border);}
+.range-subj{font-size:13px;font-weight:700;margin-bottom:.5rem;display:flex;align-items:center;gap:6px;color:var(--ink2);}
+.range-entry{display:flex;align-items:center;gap:6px;padding:3px 0;}
+.range-entry-t{flex:1;font-size:13px;color:var(--ink2);}
+
+/* ─── Responsive ─── */
+@media(max-width:640px){
+  .dash-grid{grid-template-columns:repeat(2,1fr);}
+  .sum-row{grid-template-columns:repeat(2,1fr);}
+  .stat-grid{grid-template-columns:repeat(2,1fr);}
+  .mock-scores{grid-template-columns:repeat(3,1fr);}
+  .rank-chart-pair{grid-template-columns:1fr;}
+  .fg2,.fg3,.fg4{grid-template-columns:1fr;}
+  .ntab span{display:none;}
+  .ntab{padding:5px 8px;}
+  .timer-face{font-size:54px;}
+  .cal-cell{min-height:54px;padding:4px 2px;}
+  .cal-day-num{font-size:11px;}
+}
+@media(min-width:768px){
+  .score-table-wrap{max-height:500px;overflow-y:auto;}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+<div class="hdr-in">
+  <div class="logo"><i class="ti ti-notebook" aria-hidden="true"></i></div>
+  <span class="logo-t">学習管理</span>
+  <div class="nav-tabs">
+    <button class="ntab active" id="nav-dash" onclick="switchTab('dash')"><i class="ti ti-home" aria-hidden="true"></i><span>ホーム</span></button>
+    <button class="ntab" id="nav-scores" onclick="switchTab('scores')"><i class="ti ti-chart-bar" aria-hidden="true"></i><span>成績</span></button>
+    <button class="ntab" id="nav-log" onclick="switchTab('log')"><i class="ti ti-clock" aria-hidden="true"></i><span>記録</span></button>
+    <button class="ntab" id="nav-timer" onclick="switchTab('timer')"><i class="ti ti-hourglass" aria-hidden="true"></i><span>タイマー</span></button>
+    <button class="ntab" id="nav-cal" onclick="switchTab('cal')"><i class="ti ti-calendar" aria-hidden="true"></i><span>カレンダー</span></button>
+    <button class="ntab" id="nav-books" onclick="switchTab('books')"><i class="ti ti-books" aria-hidden="true"></i><span>参考書</span></button>
+  </div>
+</div>
+</header>
+
+<!-- ══════════════ DASHBOARD ══════════════ -->
+<div class="page active" id="tab-dash">
+  <div id="dash-countdown"></div>
+  <div class="dash-grid" id="dash-stats"></div>
+  <div id="dash-streak"></div>
+  <div id="dash-due"></div>
+
+  <div class="card">
+    <div class="ch"><i class="ti ti-chart-area" aria-hidden="true" style="color:var(--blue);font-size:17px;"></i><span class="ch-t">今月の学習時間</span></div>
+    <div class="cb"><div class="chart-wrap-sm"><canvas id="dashLogChart"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ══════════════ SCORES ══════════════ -->
+<div class="page" id="tab-scores">
+  <h1 class="pg-title">成績管理</h1>
+  <p class="pg-sub">定期試験と模試の成績をまとめて管理</p>
+
+  <div class="exam-tabs" id="examTabs"></div>
+
+  <!-- ▼▼▼ 通常試験ビュー ▼▼▼ -->
+  <div id="examView">
+    <!-- 試験日設定 -->
+    <div class="card">
+      <div class="ch">
+        <i class="ti ti-calendar-event" aria-hidden="true" style="color:var(--blue);font-size:17px;"></i>
+        <span class="ch-t">試験日設定</span>
+        <span id="examDateDisplay" style="margin-left:auto;"></span>
+      </div>
+      <div class="cb" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input type="date" id="examDateInput" style="flex:1;min-width:160px;" onchange="saveExamDate()">
+        <span style="font-size:12px;color:var(--ink3);">登録するとホーム画面にカウントダウンが表示されます</span>
+      </div>
+    </div>
+
+    <!-- サマリー -->
+    <div class="sum-row" id="scoreSummary"></div>
+
+    <!-- 合計点推移 -->
+    <div class="card">
+      <div class="ch"><i class="ti ti-chart-line" aria-hidden="true" style="color:var(--blue);font-size:17px;"></i><span class="ch-t">合計点推移</span></div>
+      <div class="cb"><div class="chart-wrap"><canvas id="totalChart"></canvas></div></div>
+    </div>
+
+    <!-- 順位推移 -->
+    <div class="rank-chart-pair">
+      <div class="card" style="margin-bottom:0;">
+        <div class="ch"><span class="ch-t">学年順位推移</span></div>
+        <div class="cb"><div class="chart-wrap-sm"><canvas id="gradeRankChart"></canvas></div></div>
+      </div>
+      <div class="card" style="margin-bottom:0;">
+        <div class="ch"><span class="ch-t">クラス順位推移</span></div>
+        <div class="cb"><div class="chart-wrap-sm"><canvas id="classRankChart"></canvas></div></div>
+      </div>
+    </div>
+
+    <!-- 教科別点数：表形式 -->
+    <div class="card">
+      <div class="ch">
+        <i class="ti ti-table" aria-hidden="true" style="color:var(--blue);font-size:17px;"></i>
+        <span class="ch-t">教科別点数</span>
+      </div>
+      <div class="cb">
+        <div class="score-table-wrap">
+          <table class="score-table">
+            <thead>
+              <tr>
+                <th>教科</th>
+                <th>自分</th>
+                <th>クラス<br>平均</th>
+                <th>学年<br>平均</th>
+                <th>点差</th>
+                <th>試験対象</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="subjectTableBody"></tbody>
+          </table>
+        </div>
+        <div class="fa" style="border-top:none;padding-top:.75rem;">
+          <input type="text" id="newSubjInput" placeholder="教科名を追加（例：情報活用）" autocomplete="off" style="flex:1;" onkeydown="if(event.key==='Enter')addSubject()">
+          <button class="btn btn-p btn-s" onclick="addSubject()"><i class="ti ti-plus" aria-hidden="true"></i>追加</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 合計・順位入力 -->
+    <div class="card">
+      <div class="ch"><i class="ti ti-award" aria-hidden="true" style="color:var(--blue);font-size:17px;"></i><span class="ch-t">合計・順位</span></div>
+      <div class="cb">
+        <div class="fg4">
+          <div><label class="fl">合計点（自動計算）</label><input type="number" id="metaTotal" min="0" placeholder="—" oninput="updateMeta('total',this.value)"></div>
+          <div><label class="fl">クラス平均合計</label><input type="number" id="metaAvg" min="0" step=".1" placeholder="—" oninput="updateMeta('average',this.value)"></div>
+          <div><label class="fl">学年順位</label><input type="number" id="metaGrade" min="1" placeholder="—" oninput="updateMeta('gradeRank',this.value)"></div>
+          <div><label class="fl">クラス順位</label><input type="number" id="metaClass" min="1" placeholder="—" oninput="updateMeta('classRank',this.value)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 試験範囲 -->
+    <div class="card">
+      <div class="ch">
+        <i class="ti ti-list-check" aria-hidden="true" style="color:var(--sky);font-size:17px;"></i>
+        <span class="ch-t">試験範囲</span>
+        <button class="btn btn-s btn-sky" style="margin-left:auto;" onclick="toggleRangeForm()"><i class="ti ti-plus" aria-hidden="true"></i>追加</button>
+      </div>
+      <div class="cb" style="padding-top:.75rem;">
+        <div class="fpanel" id="rangeForm">
+          <div class="fp-t"><i class="ti ti-list-check" aria-hidden="true"></i>試験範囲を追加</div>
+          <div class="fg2">
+            <div><label class="fl">教科</label><input type="text" id="rangeSubj" placeholder="例：現代の国語" autocomplete="off"></div>
+            <div><label class="fl">範囲</label><input type="text" id="rangeText" placeholder="例：教科書P12〜58" autocomplete="off" onkeydown="if(event.key==='Enter')addRange()"></div>
+          </div>
+          <div class="fa">
+            <button class="btn btn-sky" onclick="addRange()"><i class="ti ti-check" aria-hidden="true"></i>追加</button>
+            <button class="btn" onclick="closeRangeForm()">キャンセル</button>
+          </div>
+        </div>
+        <div id="rangeList"></div>
+      </div>
+    </div>
+
+    <!-- 保存ボタン -->
+    <button class="btn btn-save" onclick="saveScores()"><i class="ti ti-device-floppy" aria-hidden="true"></i>成績を保存する</button>
+    <div id="saveMsg" style="text-align:center;font-size:13px;color:var(--green);margin-top:.5rem;display:none;font-weight:600;">✓ 保存しました</div>
+  </div>
+  <!-- ▲▲▲ 通常試験ビュー ▲▲▲ -->
+
+  <!-- ▼▼▼ 模試ビュー ▼▼▼ -->
+  <div id="mockView" style="display:none;">
+    <div class="toolbar">
+      <span class="tb-label" id="mockCount">0件の模試</span>
+      <button class="btn btn-p" onclick="toggleMockForm()"><i class="ti ti-plus" aria-hidden="true"></i>模試を追加</button>
+    </div>
+
+    <div class="fpanel" id="addMockForm">
+      <div class="fp-t"><i class="ti ti-file-certificate" aria-hidden="true"></i>模試を登録</div>
+      <div class="fg2">
+        <div><label class="fl">模試名 *</label><input type="text" id="mockName" placeholder="例：全統模試" autocomplete="off"></div>
+        <div><label class="fl">実施日</label><input type="date" id="mockDate"></div>
+      </div>
+      <div class="fg3">
+        <div><label class="fl">偏差値</label><input type="number" id="mockHensa" min="0" max="100" step=".1" placeholder="—"></div>
+        <div><label class="fl">学年順位</label><input type="number" id="mockGRank" min="1" placeholder="—"></div>
+        <div><label class="fl">判定</label>
+          <select id="mockHantei"><option value="">—</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select>
+        </div>
+      </div>
+      <div class="sec-t" style="margin-top:1rem;">教科別点数</div>
+      <div class="fg3">
+        <div><label class="fl">国語</label><input type="number" id="msc0" min="0" placeholder="—"></div>
+        <div><label class="fl">数学</label><input type="number" id="msc1" min="0" placeholder="—"></div>
+        <div><label class="fl">英語</label><input type="number" id="msc2" min="0" placeholder="—"></div>
+        <div><label class="fl">理科</label><input type="number" id="msc3" min="0" placeholder="—"></div>
+        <div><label class="fl">社会</label><input type="number" id="msc4" min="0" placeholder="—"></div>
+      </div>
+      <div class="fa">
+        <button class="btn btn-p" onclick="addMock()"><i class="ti ti-check" aria-hidden="true"></i>登録</button>
+        <button class="btn" onclick="closeMockForm()">キャンセル</button>
+      </div>
+    </div>
+
+    <div class="card" id="mockChartCard" style="display:none;">
+      <div class="ch"><i class="ti ti-chart-line" aria-hidden="true" style="color:var(--blue);font-size:17px;"></i><span class="ch-t">偏差値推移</span></div>
+      <div class="cb"><div class="chart-wrap"><canvas id="hensaChart"></canvas></div></div>
+    </div>
+
+    <div id="mockList"></div>
+  </div>
+  <!-- ▲▲▲ 模試ビュー ▲▲▲ -->
+</div>
+
+<!-- ══════════════ LOG ══════════════ -->
+<div class="page" id="tab-log">
+  <h1 class="pg-title">学習記録</h1>
+  <p class="pg-sub">毎日の学習を記録・分析</p>
+
+  <div class="stat-grid" id="logStats"></div>
+
+  <div class="card">
+    <div class="ch"><i class="ti ti-chart-area" aria-hidden="true" style="color:var(--sky);font-size:17px;"></i><span class="ch-t">学習時間推移（直近14日）</span></div>
+    <div class="cb"><div class="chart-wrap-sm"><canvas id="logBarChart"></canvas></div></div>
+  </div>
+
+  <!-- 教材マスター -->
+  <div class="card">
+    <div class="ch">
+      <i class="ti ti-library" aria-hidden="true" style="color:var(--sky);font-size:17px;"></i>
+      <span class="ch-t">教材マスター</span>
+      <button class="btn btn-s btn-sky" style="margin-left:auto;" onclick="toggleMatForm()"><i class="ti ti-plus" aria-hidden="true"></i>教材追加</button>
+    </div>
+    <div class="cb">
+      <div class="fpanel" id="addMatForm">
+        <div class="fp-t"><i class="ti ti-book-plus" aria-hidden="true"></i>教材を登録</div>
+        <div class="fg2">
+          <div><label class="fl">教科名</label><input type="text" id="matSubj" placeholder="例：数学A" autocomplete="off"></div>
+          <div><label class="fl">教材種別</label>
+            <select id="matType"><option value="参考書">参考書</option><option value="問題集">問題集</option><option value="学校教材">学校教材</option><option value="プリント">プリント</option><option value="その他">その他</option></select>
+          </div>
+        </div>
+        <label class="fl">教材名 *</label>
+        <input type="text" id="matName" placeholder="例：青チャート" autocomplete="off">
+        <div class="fg2" style="margin-top:8px;">
+          <div><label class="fl">総ページ数</label><input type="number" id="matTotalP" min="0" placeholder="例：350"></div>
+          <div><label class="fl">現在ページ</label><input type="number" id="matCurP" min="0" placeholder="例：65"></div>
+        </div>
+        <div class="fa">
+          <button class="btn btn-sky" onclick="addMaterial()"><i class="ti ti-check" aria-hidden="true"></i>登録</button>
+          <button class="btn" onclick="closeMatForm()">キャンセル</button>
+        </div>
+      </div>
+      <div id="materialList"></div>
+    </div>
+  </div>
+
+  <!-- 学習時間分析 -->
+  <div class="card">
+    <div class="ch"><i class="ti ti-chart-pie" aria-hidden="true" style="color:var(--blue);font-size:17px;"></i><span class="ch-t">学習時間分析</span></div>
+    <div class="cb">
+      <div class="period-tabs" id="analysisPeriodTabs">
+        <button class="ptab active" onclick="setAnalysisPeriod('today',this)">今日</button>
+        <button class="ptab" onclick="setAnalysisPeriod('week',this)">今週</button>
+        <button class="ptab" onclick="setAnalysisPeriod('month',this)">今月</button>
+        <button class="ptab" onclick="setAnalysisPeriod('all',this)">全期間</button>
+      </div>
+      <div id="analysisContent"></div>
+    </div>
+  </div>
+
+  <!-- 記録一覧 -->
+  <div class="toolbar" style="margin-top:.5rem;">
+    <span class="tb-label" id="logCount">0件の記録</span>
+    <button class="btn btn-p" onclick="toggleLogForm()"><i class="ti ti-plus" aria-hidden="true"></i>記録を追加</button>
+  </div>
+  <div class="fpanel" id="addLogForm">
+    <div class="fp-t"><i class="ti ti-pencil" aria-hidden="true"></i>学習記録を追加</div>
+    <div class="fg2">
+      <div><label class="fl">日付</label><input type="date" id="logDate"></div>
+      <div><label class="fl">教材 *</label><select id="logMat"><option value="">選択してください</option></select></div>
+    </div>
+    <div class="fg3">
+      <div><label class="fl">開始</label><input type="time" id="logStart" oninput="calcDur('logStart','logEnd','durDisp')"></div>
+      <div><label class="fl">終了</label><input type="time" id="logEnd" oninput="calcDur('logStart','logEnd','durDisp')"></div>
+      <div><label class="fl">学習時間</label><div id="durDisp" class="dur-disp">—</div></div>
+    </div>
+    <label class="fl">メモ（任意）</label>
+    <textarea id="logMemo" placeholder="学習内容・気づきなど"></textarea>
+    <div class="fa">
+      <button class="btn btn-p" onclick="addLog()"><i class="ti ti-check" aria-hidden="true"></i>追加</button>
+      <button class="btn" onclick="closeLogForm()">キャンセル</button>
+    </div>
+  </div>
+  <div class="fpanel" id="editLogForm">
+    <div class="fp-t"><i class="ti ti-edit" aria-hidden="true"></i>学習記録を編集</div>
+    <div class="fg2">
+      <div><label class="fl">日付</label><input type="date" id="elogDate"></div>
+      <div><label class="fl">教材</label><select id="elogMat"><option value="">選択</option></select></div>
+    </div>
+    <div class="fg3">
+      <div><label class="fl">開始</label><input type="time" id="elogStart" oninput="calcDur('elogStart','elogEnd','eDurDisp')"></div>
+      <div><label class="fl">終了</label><input type="time" id="elogEnd" oninput="calcDur('elogStart','elogEnd','eDurDisp')"></div>
+      <div><label class="fl">学習時間</label><div id="eDurDisp" class="dur-disp">—</div></div>
+    </div>
+    <label class="fl">メモ</label><textarea id="elogMemo"></textarea>
+    <div class="fa">
+      <button class="btn btn-p" onclick="saveEditLog()"><i class="ti ti-check" aria-hidden="true"></i>保存</button>
+      <button class="btn" onclick="closeEditLog()">キャンセル</button>
+    </div>
+  </div>
+  <div id="logList"></div>
+</div>
+
+<!-- ══════════════ TIMER ══════════════ -->
+<div class="page" id="tab-timer">
+  <h1 class="pg-title">学習タイマー</h1>
+  <p class="pg-sub">集中して学習し、終わったら記録に保存</p>
+  <div class="card">
+    <div class="timer-display">
+      <div class="timer-mode-tabs">
+        <button class="ptab active" id="timerModeNormal" onclick="setTimerMode('normal',this)">通常タイマー</button>
+        <button class="ptab" id="timerModePomo" onclick="setTimerMode('pomo',this)">ポモドーロ</button>
+      </div>
+      <div class="timer-face" id="timerFace">00:00</div>
+      <div class="timer-sub" id="timerSub">開始ボタンで計測開始</div>
+      <div class="pomo-dots" id="pomoDots" style="display:none;"></div>
+      <div class="timer-btns">
+        <button class="btn btn-p" id="timerStartBtn" onclick="timerStart()"><i class="ti ti-player-play" aria-hidden="true"></i>開始</button>
+        <button class="btn" id="timerPauseBtn" onclick="timerPause()" style="display:none;"><i class="ti ti-player-pause" aria-hidden="true"></i>一時停止</button>
+        <button class="btn" id="timerResumeBtn" onclick="timerResume()" style="display:none;"><i class="ti ti-player-play" aria-hidden="true"></i>再開</button>
+        <button class="btn btn-d" id="timerStopBtn" onclick="timerStop()" style="display:none;"><i class="ti ti-player-stop" aria-hidden="true"></i>終了</button>
+        <button class="btn" id="timerResetBtn" onclick="timerReset()" style="display:none;"><i class="ti ti-refresh" aria-hidden="true"></i>リセット</button>
+      </div>
+    </div>
+    <div class="timer-save-form" id="timerSaveForm">
+      <div class="fp-t"><i class="ti ti-device-floppy" aria-hidden="true"></i>学習記録に保存</div>
+      <div class="fg2">
+        <div><label class="fl">日付</label><input type="date" id="timerDate"></div>
+        <div><label class="fl">教材</label><select id="timerMat"><option value="">選択してください</option></select></div>
+      </div>
+      <label class="fl">メモ（任意）</label>
+      <textarea id="timerMemo" placeholder="学習内容など"></textarea>
+      <div class="fa">
+        <button class="btn btn-p" onclick="saveTimerLog()"><i class="ti ti-check" aria-hidden="true"></i>保存</button>
+        <button class="btn" onclick="closeTimerSave()">キャンセル</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch"><i class="ti ti-info-circle" aria-hidden="true" style="color:var(--ink3);"></i><span class="ch-t">使い方</span></div>
+    <div class="cb" style="font-size:13px;color:var(--ink2);line-height:1.8;">
+      <b>通常モード</b>：自由に時間計測。終了後に教材を選んで記録保存。<br>
+      <b>ポモドーロ</b>：25分集中 → 5分休憩を4セット繰り返します。
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ CALENDAR ══════════════ -->
+<div class="page" id="tab-cal">
+  <h1 class="pg-title">カレンダー</h1>
+  <p class="pg-sub">予定・提出物を一括管理</p>
+
+  <div class="card">
+    <div class="cb">
+      <div class="cal-nav">
+        <button class="btn btn-s" onclick="calMonthShift(-1)"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+        <span class="cal-month" id="calMonthLabel"></span>
+        <button class="btn btn-s" onclick="calMonthShift(1)"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+  </div>
+
+  <!-- 予定追加 -->
+  <div class="toolbar">
+    <span class="tb-label" id="eventDateLabel">予定・提出物を追加</span>
+    <button class="btn btn-p" onclick="toggleEventForm()"><i class="ti ti-plus" aria-hidden="true"></i>追加</button>
+  </div>
+  <div class="fpanel" id="addEventForm">
+    <div class="fp-t"><i class="ti ti-calendar-plus" aria-hidden="true"></i>予定を追加</div>
+    <div class="fg2">
+      <div><label class="fl">種類</label>
+        <select id="evType" onchange="toggleEvTypeFields()">
+          <option value="event">予定</option>
+          <option value="submission">提出物</option>
+        </select>
+      </div>
+      <div><label class="fl">日付</label><input type="date" id="evDate"></div>
+    </div>
+    <label class="fl">タイトル *</label>
+    <input type="text" id="evTitle" placeholder="例：数学A 課題提出" autocomplete="off">
+    <div id="evEventFields">
+      <div class="fg2">
+        <div><label class="fl">時間</label><input type="time" id="evTime"></div>
+        <div><label class="fl">カテゴリー</label>
+          <select id="evCategory">
+            <option value="study">📘 勉強</option>
+            <option value="school">🏫 学校</option>
+            <option value="club">⚽ 部活</option>
+            <option value="private">🏠 プライベート</option>
+            <option value="other">📌 その他</option>
+          </select>
+        </div>
+      </div>
+      <label class="fl">内容（任意）</label>
+      <textarea id="evContent" placeholder="詳細メモ"></textarea>
+    </div>
+    <div id="evSubFields" style="display:none;">
+      <div class="fg2">
+        <div><label class="fl">教科</label><input type="text" id="evSubject" placeholder="例：数学A" autocomplete="off"></div>
+        <div><label class="fl">状態</label>
+          <select id="evStatus"><option value="todo">未着手</option><option value="doing">作成中</option><option value="done">提出済み</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="fa">
+      <button class="btn btn-p" onclick="addEvent()"><i class="ti ti-check" aria-hidden="true"></i>追加</button>
+      <button class="btn" onclick="closeEventForm()">キャンセル</button>
+    </div>
+  </div>
+
+  <!-- 提出物リスト -->
+  <div class="card">
+    <div class="ch"><i class="ti ti-clipboard-text" aria-hidden="true" style="color:var(--orange);font-size:17px;"></i><span class="ch-t">提出物（期限が近い順）</span></div>
+    <div class="cb" id="submissionList"></div>
+  </div>
+
+  <!-- 選択日の予定 -->
+  <div class="card">
+    <div class="ch"><i class="ti ti-list" aria-hidden="true" style="color:var(--blue);font-size:17px;"></i><span class="ch-t" id="dayEventsTitle">予定一覧</span></div>
+    <div class="cb" id="dayEventsList"></div>
+  </div>
+</div>
+
+<!-- ══════════════ BOOKS ══════════════ -->
+<div class="page" id="tab-books">
+  <h1 class="pg-title">参考書管理</h1>
+  <p class="pg-sub">所持中の参考書と購入予定を管理</p>
+
+  <div class="books-section-tabs">
+    <button class="bstab active" id="booksOwnedTab" onclick="setBooksSection('owned')"><i class="ti ti-book-2" aria-hidden="true"></i> 購入済み</button>
+    <button class="bstab" id="booksWishTab" onclick="setBooksSection('wish')"><i class="ti ti-shopping-cart" aria-hidden="true"></i> 購入予定</button>
+  </div>
+
+  <div class="toolbar">
+    <span class="tb-label" id="bookCount">0冊</span>
+    <button class="btn btn-p" onclick="toggleBookForm()"><i class="ti ti-plus" aria-hidden="true"></i>参考書を追加</button>
+  </div>
+  <div class="fpanel" id="addBookForm">
+    <div class="fp-t"><i class="ti ti-book-upload" aria-hidden="true"></i>参考書を登録</div>
+    <label class="fl">書名 *</label>
+    <input type="text" id="bookTitle" placeholder="例：青チャート 数学I+A" autocomplete="off">
+    <div class="fg2">
+      <div><label class="fl">教科・ジャンル</label><input type="text" id="bookSubj" placeholder="例：数学"></div>
+      <div><label class="fl">優先度</label>
+        <select id="bookPri"><option value="高">🔴 高</option><option value="中">🟡 中</option><option value="低">🟢 低</option></select>
+      </div>
+    </div>
+    <label class="fl">特徴・メモ</label>
+    <textarea id="bookMemo" placeholder="難易度・使い方など"></textarea>
+    <label class="fl">表紙写真（任意）</label>
+    <div class="upload-row">
+      <label class="upload-label" for="photoInput"><i class="ti ti-photo-up" aria-hidden="true"></i>写真を選択</label>
+      <input type="file" id="photoInput" accept="image/*" onchange="previewPhoto(event)">
+      <img id="photoPreview" alt="表紙プレビュー">
+      <button class="btn btn-s" id="clearPhotoBtn" style="display:none;" onclick="clearPhoto()"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <div class="fa">
+      <button class="btn btn-p" onclick="addBook()"><i class="ti ti-check" aria-hidden="true"></i>登録</button>
+      <button class="btn" onclick="closeBookForm()">キャンセル</button>
+    </div>
+  </div>
+
+  <!-- ユニット追加フォーム（購入済みのみ） -->
+  <div class="fpanel" id="addUnitForm">
+    <div class="fp-t"><i class="ti ti-list-details" aria-hidden="true"></i>ユニットを追加</div>
+    <div class="fg2">
+      <div><label class="fl">ユニット名</label><input type="text" id="unitName" placeholder="例：2次関数" autocomplete="off" onkeydown="if(event.key==='Enter')addUnit()"></div>
+      <div><label class="fl">状態</label>
+        <select id="unitStatus"><option value="todo">未着手</option><option value="progress">学習中</option><option value="done">完了</option></select>
+      </div>
+    </div>
+    <div class="fa">
+      <button class="btn btn-p" onclick="addUnit()"><i class="ti ti-check" aria-hidden="true"></i>追加</button>
+      <button class="btn" onclick="closeUnitForm()">キャンセル</button>
+    </div>
+  </div>
+
+  <div id="booksList"></div>
+</div>
+
+
+<style>
+.dur-disp{padding:9px 8px;background:var(--acc-bg2);border-radius:var(--r8);font-size:14px;font-weight:700;color:var(--blue);text-align:center;min-height:38px;display:flex;align-items:center;justify-content:center;}
+</style>
+<script>
+'use strict';
+/* ══════════════════════════════════════
+   STATE & STORAGE
+══════════════════════════════════════ */
+const KEY = 'study_v5';
+const DEFAULT_SUBJECTS = ['現代の国語','言語文化','数学Ⅱ','数学A','論理表現','英語コミュニケーション','化学','物理','生物','地理','歴史','公共','保健'];
+const EXAM_NAMES = ['前期中間','前期期末','後期中間①','後期中間②','学年末試験'];
+const MOCK_SUBJECTS=['国語','数学','英語','理科','社会'];
+const HANTEI_BDG={A:'bdg-green',B:'bdg-sky',C:'bdg-blue',D:'bdg-amber',E:'bdg-red'};
+const PRI_BADGE={高:'bdg-red',中:'bdg-amber',低:'bdg-green'};
+const PRI_LABEL={高:'高 優先',中:'中 優先',低:'低 優先'};
+const CAT_INFO={
+  study:{label:'勉強',emoji:'\u{1F4D8}',color:'#2563EB'},
+  school:{label:'学校',emoji:'\u{1F3EB}',color:'#0EA5E9'},
+  club:{label:'部活',emoji:'\u26BD',color:'#059669'},
+  private:{label:'プライベート',emoji:'\u{1F3E0}',color:'#7C3AED'},
+  other:{label:'その他',emoji:'\u{1F4CC}',color:'#7B8AB8'}
+};
+const SUB_STATUS_LABEL={todo:'未着手',doing:'作成中',done:'提出済み'};
+const SUB_STATUS_NEXT={todo:'doing',doing:'done',done:'todo'};
+
+function makeExam(name){
+  return {name,date:'',subjects:{},hidden:{},classAvgs:{},gradeAvgs:{},total:'',average:'',gradeRank:'',classRank:'',ranges:[]};
+}
+
+let S = {
+  exams: EXAM_NAMES.map(n=>makeExam(n)),
+  activeExamIdx: 0,
+  books: [],
+  materials: [],
+  logs: [],
+  mockTests: [],
+  events: [],
+  analysisPeriod: 'all'
+};
+
+function load(){
+  try{
+    const r=localStorage.getItem(KEY);
+    if(r){const d=JSON.parse(r);Object.assign(S,d);}
+    // migrate from older key
+    if(!r){
+      const old=localStorage.getItem('study_v4')||localStorage.getItem('study_v3');
+      if(old){const d=JSON.parse(old);Object.assign(S,d);}
+    }
+  }catch(e){}
+  if(!S.exams||S.exams.length!==5) S.exams=EXAM_NAMES.map(n=>makeExam(n));
+  S.exams.forEach(e=>{
+    if(!e.subjects)e.subjects={};
+    if(!e.hidden)e.hidden={};
+    if(!e.classAvgs)e.classAvgs={};
+    if(!e.gradeAvgs)e.gradeAvgs={};
+    if(!e.ranges)e.ranges=[];
+    if(!e.date)e.date='';
+    const keys=Object.keys(e.subjects);
+    if(keys.length===0) DEFAULT_SUBJECTS.forEach(s=>{e.subjects[s]='';e.classAvgs[s]='';e.gradeAvgs[s]='';});
+  });
+  if(!Array.isArray(S.books))S.books=[];
+  // migrate books: ensure 'list' field (owned/wish) and units
+  S.books.forEach(b=>{
+    if(!b.list) b.list='owned';
+    if(!Array.isArray(b.units)) b.units=[];
+    if(b.id===undefined) b.id=Date.now()+Math.random();
+  });
+  if(!Array.isArray(S.materials))S.materials=[];
+  S.materials.forEach(m=>{ if(m.totalPages===undefined)m.totalPages=''; if(m.curPage===undefined)m.curPage=''; });
+  if(!Array.isArray(S.logs))S.logs=[];
+  if(!Array.isArray(S.mockTests))S.mockTests=[];
+  if(!Array.isArray(S.events))S.events=[];
+  if(!S.analysisPeriod)S.analysisPeriod='all';
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+/* ══════════════════════════════════════
+   TAB SWITCHING
+══════════════════════════════════════ */
+let chartInstances={};
+function destroyChart(id){if(chartInstances[id]){chartInstances[id].destroy();delete chartInstances[id];}}
+function makeChart(id,config){destroyChart(id);const ctx=document.getElementById(id);if(!ctx)return;chartInstances[id]=new Chart(ctx,config);}
+
+const CHART_OPTS = {
+  responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false}},
+  scales:{
+    y:{ticks:{font:{size:10},color:'#7B8AB8'},grid:{color:'rgba(99,120,210,0.08)'},border:{display:false}},
+    x:{ticks:{font:{size:10},color:'#7B8AB8',maxRotation:0},grid:{display:false},border:{display:false}}
+  }
+};
+
+function switchTab(tab){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('nav-'+tab).classList.add('active');
+  if(tab==='dash')renderDash();
+  if(tab==='scores')renderScores();
+  if(tab==='log')renderLog();
+  if(tab==='cal')renderCalendar();
+  if(tab==='books')renderBooks();
+}
+
+/* ══════════════════════════════════════
+   UTILS
+══════════════════════════════════════ */
+function esc(s){if(s===undefined||s===null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function pad(n){return String(n).padStart(2,'0');}
+function fmtMins(m){if(!m)return'0分';const h=Math.floor(m/60),mn=m%60;return h>0?`${h}h${mn>0?mn+'m':''}`:`${mn}分`;}
+function durationMins(s,e){if(!s||!e)return 0;const[sh,sm]=s.split(':').map(Number);const[eh,em]=e.split(':').map(Number);const d=(eh*60+em)-(sh*60+sm);return d>0?d:0;}
+function durText(s,e){const m=durationMins(s,e);if(!m)return'—';const h=Math.floor(m/60),mn=m%60;return h>0?`${h}時間${mn?mn+'分':''}`:`${mn}分`;}
+function calcDur(sId,eId,dispId){document.getElementById(dispId).textContent=durText(document.getElementById(sId).value,document.getElementById(eId).value);}
+function weekStart(){const d=new Date();d.setDate(d.getDate()-d.getDay()+1);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function monthStart(){const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1);}
+function getLogsInPeriod(period){
+  const t=todayStr(),ws=weekStart(),ms=monthStart();
+  return S.logs.filter(l=>{
+    if(period==='today')return l.date===t;
+    if(period==='week')return l.date>=ws;
+    if(period==='month')return l.date&&l.date.startsWith(ms);
+    return true;
+  });
+}
+
+/* ══════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════ */
+function renderDash(){
+  renderCountdown();
+  renderDashStats();
+  renderStreak();
+  renderDashDue();
+  renderDashChart();
+}
+
+function renderCountdown(){
+  const el=document.getElementById('dash-countdown');
+  const today=new Date(); today.setHours(0,0,0,0);
+  const upcoming=S.exams
+    .filter(e=>e.date)
+    .map(e=>({name:e.name,d:new Date(e.date+'T00:00:00')}))
+    .filter(e=>e.d>=today)
+    .sort((a,b)=>a.d-b.d);
+  if(!upcoming.length){el.innerHTML='';return;}
+  const next=upcoming[0];
+  const days=Math.round((next.d-today)/(1000*60*60*24));
+  el.innerHTML=`<div class="countdown-wrap">
+    <div class="cd-label">次の試験</div>
+    <div class="cd-name">${esc(next.name)}まで</div>
+    <div class="cd-days">${days}</div>
+    <div class="cd-unit">日後</div>
+  </div>`;
+}
+
+function renderDashStats(){
+  const t=todayStr(),ws=weekStart(),ms=monthStart();
+  let today=0,week=0,month=0;
+  S.logs.forEach(l=>{const m=l.mins||0;if(l.date===t)today+=m;if(l.date>=ws)week+=m;if(l.date&&l.date.startsWith(ms))month+=m;});
+  const subjMap={};
+  S.logs.filter(l=>l.date&&l.date.startsWith(ms)).forEach(l=>{
+    const s=l.matSubject||'その他';
+    subjMap[s]=(subjMap[s]||0)+(l.mins||0);
+  });
+  const topSubj=Object.entries(subjMap).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('dash-stats').innerHTML=[
+    {l:'今日',v:fmtMins(today)},
+    {l:'今週',v:fmtMins(week)},
+    {l:'今月',v:fmtMins(month)},
+    {l:'今月最多教科',v:topSubj?topSubj[0]:'—'},
+  ].map(s=>`<div class="dash-stat"><div class="ds-val" style="font-size:${s.l==='今月最多教科'?'14px':'22px'};">${esc(s.v)}</div><div class="ds-label">${s.l}</div></div>`).join('');
+}
+
+function renderStreak(){
+  const el=document.getElementById('dash-streak');
+  const dates=new Set(S.logs.map(l=>l.date).filter(Boolean));
+  let streak=0;
+  const d=new Date(); d.setHours(0,0,0,0);
+  while(true){
+    const ds=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+    if(dates.has(ds)){streak++;d.setDate(d.getDate()-1);}
+    else break;
+    if(streak>365)break;
+  }
+  el.innerHTML=streak>0?`<div class="streak-card">
+    <div class="streak-num">\u{1F525}${streak}</div>
+    <div class="streak-info"><div class="streak-title">学習連続日数</div><div class="streak-sub">${streak}日連続で学習しています！</div></div>
+  </div>`:'';
+}
+
+function renderDashDue(){
+  const el=document.getElementById('dash-due');
+  const subs=S.events.filter(e=>e.type==='submission'&&e.status!=='done').sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  if(!subs.length){el.innerHTML='';return;}
+  const top=subs.slice(0,3);
+  el.innerHTML=`<div class="card">
+    <div class="ch"><i class="ti ti-clipboard-text" aria-hidden="true" style="color:var(--orange);font-size:17px;"></i><span class="ch-t">期限が近い提出物</span></div>
+    <div class="cb" style="padding-top:.5rem;">
+      ${top.map(s=>{
+        const days=daysUntil(s.date);
+        const urgent=days!==null&&days<=2;
+        return `<div class="event-item" style="margin-bottom:.5rem;">
+          <div class="event-color-bar" style="background:${urgent?'var(--red)':'var(--orange)'};"></div>
+          <div class="event-body">
+            <div class="event-title">${esc(s.title)}</div>
+            <div class="event-meta">${s.subject?esc(s.subject)+' · ':''}${s.date||'—'}${days!==null?` (${days>=0?'あと'+days+'日':days*-1+'日遅れ'})`:''}</div>
+          </div>
+          <span class="sub-status sub-${s.status}" onclick="cycleSubStatus(${s.id})">${SUB_STATUS_LABEL[s.status]}</span>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+function daysUntil(dateStr){
+  if(!dateStr)return null;
+  const today=new Date();today.setHours(0,0,0,0);
+  const d=new Date(dateStr+'T00:00:00');
+  return Math.round((d-today)/(1000*60*60*24));
+}
+
+function renderDashChart(){
+  const labels=[],data=[];
+  const ms=monthStart();
+  const daysInMonth=new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate();
+  for(let i=1;i<=daysInMonth;i++){
+    const ds=ms+'-'+pad(i);
+    const tot=S.logs.filter(l=>l.date===ds).reduce((a,l)=>a+(l.mins||0),0);
+    labels.push(i+'日');data.push(tot>0?Math.round(tot/6)/10:0);
+  }
+  makeChart('dashLogChart',{type:'bar',data:{labels,datasets:[{label:'時間',data,backgroundColor:'rgba(37,99,235,.18)',borderColor:'#2563EB',borderWidth:1.5,borderRadius:4}]},options:{...CHART_OPTS,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:v=>v+'h',font:{size:10},color:'#7B8AB8'},grid:{color:'rgba(99,120,210,0.08)'},border:{display:false}},x:{ticks:{font:{size:9},color:'#7B8AB8',maxRotation:0,autoSkip:true,maxTicksLimit:10},grid:{display:false},border:{display:false}}}}});
+}
+
+/* ══════════════════════════════════════
+   SCORES
+══════════════════════════════════════ */
+function getExam(){return S.exams[S.activeExamIdx];}
+
+function renderScores(){
+  renderExamTabs();
+  if(S.activeExamIdx==='mock'){
+    document.getElementById('examView').style.display='none';
+    document.getElementById('mockView').style.display='';
+    renderMock();
+    return;
+  }
+  document.getElementById('examView').style.display='';
+  document.getElementById('mockView').style.display='none';
+  renderExamDate();
+  renderSummary();
+  renderTotalChart();
+  renderRankCharts();
+  renderSubjectTable();
+  fillMeta();
+  renderRangeList();
+}
+
+function renderExamTabs(){
+  let html=S.exams.map((e,i)=>
+    `<button class="etab${i===S.activeExamIdx?' active':''}" onclick="selectExam(${i})">${esc(e.name)}</button>`
+  ).join('');
+  html+=`<button class="etab${S.activeExamIdx==='mock'?' active':''}" onclick="selectExam('mock')"><i class="ti ti-file-certificate" aria-hidden="true"></i> 模試</button>`;
+  document.getElementById('examTabs').innerHTML=html;
+}
+function selectExam(i){S.activeExamIdx=i;save();renderScores();}
+
+function renderExamDate(){
+  const ex=getExam();
+  document.getElementById('examDateInput').value=ex.date||'';
+  document.getElementById('examDateDisplay').innerHTML=ex.date?`<span class="exam-date-badge"><i class="ti ti-calendar" aria-hidden="true"></i> ${ex.date}</span>`:'';
+}
+function saveExamDate(){getExam().date=document.getElementById('examDateInput').value;save();renderDash();}
+
+function renderSummary(){
+  const ex=getExam();
+  const items=[
+    {l:'合計点',v:ex.total!==''&&ex.total!==undefined?ex.total+'点':'—'},
+    {l:'教科数',v:Object.keys(ex.subjects).filter(s=>!ex.hidden[s]).length+'科目'},
+    {l:'学年順位',v:ex.gradeRank?ex.gradeRank+'位':'—'},
+    {l:'クラス順位',v:ex.classRank?ex.classRank+'位':'—'},
+  ];
+  document.getElementById('scoreSummary').innerHTML=items.map(it=>
+    `<div class="sum-c"><div class="sum-v">${esc(String(it.v))}</div><div class="sum-l">${it.l}</div></div>`
+  ).join('');
+}
+
+function renderSubjectTable(){
+  const ex=getExam();
+  const subjects=Object.keys(ex.subjects);
+  const tbody=document.getElementById('subjectTableBody');
+  if(!subjects.length){tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--ink3);padding:1.5rem 0;">↓ 教科を追加してください</td></tr>`;return;}
+  tbody.innerHTML=subjects.map(s=>{
+    const hidden=ex.hidden[s];
+    const score=ex.subjects[s]!==undefined?ex.subjects[s]:'';
+    const ca=ex.classAvgs[s]!==undefined?ex.classAvgs[s]:'';
+    const ga=ex.gradeAvgs[s]!==undefined?ex.gradeAvgs[s]:'';
+    const diff=(score!==''&&ga!=='')?(parseFloat(score)-parseFloat(ga)):null;
+    const diffHtml=diff!==null?`<span class="diff-chip ${diff>0?'diff-pos':diff<0?'diff-neg':'diff-zero'}">${diff>0?'+':''}${diff.toFixed(1)}</span>`:`<span class="diff-chip diff-zero">—</span>`;
+    return `<tr class="${hidden?'subj-hidden-row':''}">
+      <td>${esc(s)}</td>
+      <td>${hidden?'<span style="color:var(--ink4);">—</span>':`<input class="score-inp-t" type="number" min="0" max="100" value="${esc(String(score))}" placeholder="—" oninput="updateSubjScore('${esc(s)}',this.value)">`}</td>
+      <td>${hidden?'—':`<input class="score-inp-t score-inp-avg" type="number" min="0" max="100" step=".1" value="${esc(String(ca))}" placeholder="—" oninput="updateClassAvg('${esc(s)}',this.value)">`}</td>
+      <td>${hidden?'—':`<input class="score-inp-t score-inp-avg" type="number" min="0" max="100" step=".1" value="${esc(String(ga))}" placeholder="—" oninput="updateGradeAvg('${esc(s)}',this.value)">`}</td>
+      <td>${hidden?'—':diffHtml}</td>
+      <td><button class="toggle-vis${hidden?' off':''}" onclick="toggleSubjHidden('${esc(s)}')">${hidden?'対象外':'対象'}</button></td>
+      <td><button class="btn btn-s btn-d" onclick="deleteSubject('${esc(s)}')" title="削除"><i class="ti ti-trash" aria-hidden="true"></i></button></td>
+    </tr>`;
+  }).join('');
+}
+
+function toggleSubjHidden(name){const ex=getExam();ex.hidden[name]=!ex.hidden[name];renderSubjectTable();}
+function updateSubjScore(name,val){getExam().subjects[name]=val;renderSubjectTable();}
+function updateClassAvg(name,val){getExam().classAvgs[name]=val;renderSubjectTable();}
+function updateGradeAvg(name,val){getExam().gradeAvgs[name]=val;renderSubjectTable();}
+
+function addSubject(){
+  const inp=document.getElementById('newSubjInput');
+  const name=inp.value.trim();if(!name)return;
+  S.exams.forEach(e=>{if(e.subjects[name]===undefined){e.subjects[name]='';e.classAvgs[name]='';e.gradeAvgs[name]='';}});
+  inp.value='';save();renderSubjectTable();
+}
+function deleteSubject(name){
+  if(!confirm(`「${name}」を全試験から削除しますか？`))return;
+  S.exams.forEach(e=>{delete e.subjects[name];delete e.hidden[name];delete e.classAvgs[name];delete e.gradeAvgs[name];});
+  save();renderSubjectTable();
+}
+
+function saveScores(){
+  const ex=getExam();
+  const subjects=Object.keys(ex.subjects).filter(s=>!ex.hidden[s]);
+  const scores=subjects.map(s=>ex.subjects[s]).filter(v=>v!=='').map(Number);
+  if(scores.length>0){
+    const total=scores.reduce((a,b)=>a+b,0);
+    ex.total=total;
+    document.getElementById('metaTotal').value=total;
+  }
+  save();
+  renderSummary();
+  renderTotalChart();
+  const msg=document.getElementById('saveMsg');
+  msg.style.display='block';
+  setTimeout(()=>msg.style.display='none',2500);
+}
+
+function updateMeta(field,val){getExam()[field]=val;save();}
+function fillMeta(){
+  const ex=getExam();
+  document.getElementById('metaTotal').value=ex.total||'';
+  document.getElementById('metaAvg').value=ex.average||'';
+  document.getElementById('metaGrade').value=ex.gradeRank||'';
+  document.getElementById('metaClass').value=ex.classRank||'';
+}
+
+function renderTotalChart(){
+  const labels=S.exams.map(e=>e.name);
+  const data=S.exams.map(e=>e.total!==''&&e.total!==undefined?parseFloat(e.total):null);
+  makeChart('totalChart',{type:'line',data:{labels,datasets:[{label:'合計点',data,borderColor:'#2563EB',backgroundColor:'rgba(37,99,235,.1)',borderWidth:2.5,pointRadius:6,pointHoverRadius:9,pointBackgroundColor:'#2563EB',pointBorderColor:'#fff',pointBorderWidth:2,tension:.35,fill:true,spanGaps:true}]},options:{...CHART_OPTS,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y!==null?c.parsed.y+'点':'—'}}},scales:{y:{beginAtZero:false,ticks:{callback:v=>v+'点',font:{size:10},color:'#7B8AB8'},grid:{color:'rgba(99,120,210,0.08)'},border:{display:false}},x:{ticks:{font:{size:10},color:'#7B8AB8',maxRotation:0},grid:{display:false},border:{display:false}}}}});
+}
+
+function renderRankCharts(){
+  const labels=S.exams.map(e=>e.name);
+  function rankChart(id,data,color){
+    makeChart(id,{type:'line',data:{labels,datasets:[{label:'順位',data,borderColor:color,backgroundColor:color.replace('rgb','rgba').replace(')',',.1)'),borderWidth:2,pointRadius:5,pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:2,tension:.3,spanGaps:true}]},options:{...CHART_OPTS,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y!==null?c.parsed.y+'位':'—'}}},scales:{y:{reverse:true,beginAtZero:false,ticks:{callback:v=>v+'位',font:{size:10},color:'#7B8AB8'},grid:{color:'rgba(99,120,210,0.08)'},border:{display:false}},x:{ticks:{font:{size:9},color:'#7B8AB8',maxRotation:0},grid:{display:false},border:{display:false}}}}});
+  }
+  rankChart('gradeRankChart',S.exams.map(e=>e.gradeRank?parseFloat(e.gradeRank):null),'rgb(37,99,235)');
+  rankChart('classRankChart',S.exams.map(e=>e.classRank?parseFloat(e.classRank):null),'rgb(14,165,233)');
+}
+
+/* ── Exam Range ── */
+function toggleRangeForm(){
+  const f=document.getElementById('rangeForm');
+  if(!f.classList.contains('open')){f.classList.add('open');document.getElementById('rangeSubj').focus();}
+  else f.classList.remove('open');
+}
+function closeRangeForm(){document.getElementById('rangeForm').classList.remove('open');}
+function addRange(){
+  const subj=document.getElementById('rangeSubj').value.trim();
+  const text=document.getElementById('rangeText').value.trim();
+  if(!subj||!text)return;
+  getExam().ranges.push({id:Date.now(),subj,text});
+  save();closeRangeForm();renderRangeList();
+  document.getElementById('rangeSubj').value='';document.getElementById('rangeText').value='';
+}
+function deleteRange(id){const ex=getExam();ex.ranges=ex.ranges.filter(r=>r.id!==id);save();renderRangeList();}
+function renderRangeList(){
+  const ex=getExam();
+  const el=document.getElementById('rangeList');
+  if(!ex.ranges||!ex.ranges.length){el.innerHTML=`<div style="font-size:13px;color:var(--ink3);">試験範囲はまだ登録されていません</div>`;return;}
+  const grouped={};
+  ex.ranges.forEach(r=>{if(!grouped[r.subj])grouped[r.subj]=[];grouped[r.subj].push(r);});
+  el.innerHTML=Object.entries(grouped).map(([subj,entries])=>`
+    <div class="range-item">
+      <div class="range-subj"><i class="ti ti-book" aria-hidden="true" style="color:var(--sky);"></i>${esc(subj)}</div>
+      ${entries.map(e=>`<div class="range-entry"><span class="range-entry-t">・${esc(e.text)}</span><button class="btn btn-s btn-d" onclick="deleteRange(${e.id})"><i class="ti ti-x" aria-hidden="true"></i></button></div>`).join('')}
+    </div>`).join('');
+}
+
+/* ══════════════════════════════════════
+   MOCK TESTS
+══════════════════════════════════════ */
+function toggleMockForm(){
+  const f=document.getElementById('addMockForm');
+  if(!f.classList.contains('open')){
+    f.classList.add('open');
+    ['mockName','mockDate','mockHensa','mockGRank'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('mockHantei').value='';
+    MOCK_SUBJECTS.forEach((_,i)=>document.getElementById('msc'+i).value='');
+    setTimeout(()=>document.getElementById('mockName').focus(),50);
+  }else f.classList.remove('open');
+}
+function closeMockForm(){document.getElementById('addMockForm').classList.remove('open');}
+function addMock(){
+  const name=document.getElementById('mockName').value.trim();
+  if(!name){document.getElementById('mockName').focus();return;}
+  S.mockTests.push({
+    id:Date.now(),name,
+    date:document.getElementById('mockDate').value,
+    hensa:document.getElementById('mockHensa').value,
+    gradeRank:document.getElementById('mockGRank').value,
+    hantei:document.getElementById('mockHantei').value,
+    scores:MOCK_SUBJECTS.map((_,i)=>document.getElementById('msc'+i).value)
+  });
+  save();closeMockForm();renderMock();
+}
+function deleteMock(id){
+  if(!confirm('この模試を削除しますか？'))return;
+  S.mockTests=S.mockTests.filter(m=>m.id!==id);
+  save();renderMock();
+}
+function renderMock(){
+  const n=S.mockTests.length;
+  document.getElementById('mockCount').textContent=n+'件の模試';
+  const cc=document.getElementById('mockChartCard');
+  if(n>=2){cc.style.display='';renderHensaChart();}else cc.style.display='none';
+  const list=document.getElementById('mockList');
+  if(!n){list.innerHTML=`<div class="empty"><i class="ti ti-file-certificate" aria-hidden="true"></i><div class="empty-t">模試がまだ登録されていません</div></div>`;return;}
+  list.innerHTML=[...S.mockTests].reverse().map(m=>{
+    const hc=HANTEI_BDG[m.hantei]||'bdg-gray';
+    const hasScores=m.scores&&m.scores.some(s=>s!=='');
+    return `<div class="mock-card">
+      <div class="mock-header">
+        <div style="flex:1;"><div class="mock-name">${esc(m.name)}</div><div class="mock-date">${m.date||'—'}</div></div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          ${m.hantei?`<span class="bdg ${hc}" style="font-size:13px;padding:3px 10px;">判定 ${esc(m.hantei)}</span>`:''}
+          ${m.hensa?`<span class="bdg bdg-blue">偏差値 ${esc(m.hensa)}</span>`:''}
+          ${m.gradeRank?`<span class="bdg bdg-gray">学年 ${esc(m.gradeRank)}位</span>`:''}
+        </div>
+      </div>
+      ${hasScores?`<div class="mock-scores">${MOCK_SUBJECTS.map((s,i)=>`<div class="mock-sc"><div class="mock-sv">${m.scores[i]||'—'}</div><div class="mock-sl">${s}</div></div>`).join('')}</div>`:''}
+      <div style="display:flex;gap:6px;margin-top:.5rem;">
+        <button class="btn btn-s btn-d" onclick="deleteMock(${m.id})"><i class="ti ti-trash" aria-hidden="true"></i>削除</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function renderHensaChart(){
+  const sorted=[...S.mockTests].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  const labels=sorted.map(m=>m.name);
+  const data=sorted.map(m=>m.hensa?parseFloat(m.hensa):null);
+  makeChart('hensaChart',{type:'line',data:{labels,datasets:[{label:'偏差値',data,borderColor:'#2563EB',backgroundColor:'rgba(37,99,235,.1)',borderWidth:2.5,pointRadius:6,pointBackgroundColor:'#2563EB',pointBorderColor:'#fff',pointBorderWidth:2,tension:.3,fill:true,spanGaps:true}]},options:{...CHART_OPTS,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y!==null?c.parsed.y:'—'}}},scales:{y:{min:30,max:80,ticks:{font:{size:10},color:'#7B8AB8'},grid:{color:'rgba(99,120,210,0.08)'},border:{display:false}},x:{ticks:{font:{size:10},color:'#7B8AB8',maxRotation:0},grid:{display:false},border:{display:false}}}}});
+}
+
+/* ══════════════════════════════════════
+   MATERIALS
+══════════════════════════════════════ */
+function toggleMatForm(){
+  const f=document.getElementById('addMatForm');
+  if(!f.classList.contains('open')){
+    f.classList.add('open');
+    ['matSubj','matName','matTotalP','matCurP'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('matType').value='参考書';
+    setTimeout(()=>document.getElementById('matSubj').focus(),50);
+  }else f.classList.remove('open');
+}
+function closeMatForm(){document.getElementById('addMatForm').classList.remove('open');}
+function addMaterial(){
+  const name=document.getElementById('matName').value.trim();
+  if(!name){document.getElementById('matName').focus();return;}
+  S.materials.push({
+    id:Date.now(),
+    subject:document.getElementById('matSubj').value.trim(),
+    name,type:document.getElementById('matType').value,
+    totalPages:document.getElementById('matTotalP').value,
+    curPage:document.getElementById('matCurP').value
+  });
+  save();closeMatForm();renderMaterialList();
+}
+function deleteMaterial(id){
+  const idx=S.materials.findIndex(m=>m.id===id);
+  if(idx<0)return;
+  if(!confirm(`「${S.materials[idx].name}」を削除しますか？`))return;
+  S.materials.splice(idx,1);save();renderMaterialList();populateMatSelects();
+}
+function updateMatProgress(id,field,val){
+  const m=S.materials.find(m=>m.id===id);
+  if(!m)return;
+  m[field]=val;save();
+  const pct=calcPct(m);
+  const fill=document.getElementById('prog-fill-'+id);
+  const lbl=document.getElementById('prog-lbl-'+id);
+  if(fill)fill.style.width=pct+'%';
+  if(lbl)lbl.textContent=`${m.curPage||0} / ${m.totalPages||0}ページ（${pct}%）`;
+}
+function calcPct(m){
+  const tp=parseFloat(m.totalPages),cp=parseFloat(m.curPage);
+  if(!tp||tp<=0)return 0;
+  return Math.min(100,Math.round(cp/tp*100));
+}
+function renderMaterialList(){
+  const el=document.getElementById('materialList');
+  if(!S.materials.length){el.innerHTML=`<div style="font-size:13px;color:var(--ink3);padding:4px 0;">教材が登録されていません</div>`;return;}
+  el.innerHTML=S.materials.map(m=>{
+    const pct=calcPct(m);
+    return `<div class="mat-row">
+      <div class="mat-header">
+        <span class="mat-name">${esc(m.name)}</span>
+        <span class="bdg bdg-sky" style="font-size:10px;">${esc(m.type)}</span>
+        <button class="btn btn-s btn-d" onclick="deleteMaterial(${m.id})" style="margin-left:auto;"><i class="ti ti-trash" aria-hidden="true"></i></button>
+      </div>
+      <div class="mat-meta">${m.subject?esc(m.subject):''}</div>
+      ${m.totalPages?`
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill-${m.id}" style="width:${pct}%;"></div></div>
+      <div class="prog-label" id="prog-lbl-${m.id}">${m.curPage||0} / ${m.totalPages}ページ（${pct}%）</div>
+      <div class="prog-inputs">
+        <span style="font-size:12px;color:var(--ink3);">現在ページ：</span>
+        <input class="prog-inp" type="number" min="0" max="${m.totalPages}" value="${m.curPage||0}" oninput="updateMatProgress(${m.id},'curPage',this.value)">
+        <span style="font-size:12px;color:var(--ink3);">/ 全${m.totalPages}p</span>
+      </div>`:'<div class="prog-inputs"><span style="font-size:11px;color:var(--ink4);">ページ数未設定</span></div>'}
+    </div>`;
+  }).join('');
+  populateMatSelects();
+}
+
+function populateMatSelects(){
+  const opts='<option value="">選択してください</option>'+
+    S.materials.map(m=>`<option value="${m.id}">${esc(m.subject?m.subject+' / ':'')}${esc(m.name)}（${esc(m.type)}）</option>`).join('');
+  ['logMat','elogMat','timerMat'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
+}
+
+/* ══════════════════════════════════════
+   LOGS
+══════════════════════════════════════ */
+let editingLogId=null;
+
+function toggleLogForm(){
+  const f=document.getElementById('addLogForm');
+  if(!f.classList.contains('open')){
+    if(!S.materials.length){alert('先に教材マスターで教材を登録してください');return;}
+    f.classList.add('open');
+    document.getElementById('logDate').value=todayStr();
+    populateMatSelects();
+    ['logStart','logEnd','logMemo'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    document.getElementById('durDisp').textContent='—';
+  }else f.classList.remove('open');
+}
+function closeLogForm(){document.getElementById('addLogForm').classList.remove('open');}
+
+function addLog(){
+  const date=document.getElementById('logDate').value;
+  const matId=parseInt(document.getElementById('logMat').value);
+  const start=document.getElementById('logStart').value;
+  const end=document.getElementById('logEnd').value;
+  const memo=document.getElementById('logMemo').value.trim();
+  if(!date||!matId){alert('日付と教材を選択してください');return;}
+  const mat=S.materials.find(m=>m.id===matId);if(!mat)return;
+  S.logs.unshift({id:Date.now(),date,matId,matName:mat.name,matSubject:mat.subject,matType:mat.type,start,end,mins:durationMins(start,end),memo});
+  save();closeLogForm();renderLog();
+}
+function openEditLog(id){
+  const log=S.logs.find(l=>l.id===id);if(!log)return;
+  editingLogId=id;
+  populateMatSelects();
+  document.getElementById('elogDate').value=log.date||'';
+  document.getElementById('elogMat').value=log.matId||'';
+  document.getElementById('elogStart').value=log.start||'';
+  document.getElementById('elogEnd').value=log.end||'';
+  document.getElementById('elogMemo').value=log.memo||'';
+  document.getElementById('eDurDisp').textContent=durText(log.start,log.end);
+  const f=document.getElementById('editLogForm');f.classList.add('open');f.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function closeEditLog(){document.getElementById('editLogForm').classList.remove('open');editingLogId=null;}
+function saveEditLog(){
+  if(!editingLogId)return;
+  const idx=S.logs.findIndex(l=>l.id===editingLogId);if(idx<0)return;
+  const matId=parseInt(document.getElementById('elogMat').value);
+  const mat=S.materials.find(m=>m.id===matId)||{name:'不明',subject:'',type:''};
+  const start=document.getElementById('elogStart').value;
+  const end=document.getElementById('elogEnd').value;
+  S.logs[idx]={...S.logs[idx],date:document.getElementById('elogDate').value,matId,matName:mat.name,matSubject:mat.subject,matType:mat.type,start,end,mins:durationMins(start,end),memo:document.getElementById('elogMemo').value.trim()};
+  save();closeEditLog();renderLog();
+}
+function deleteLog(id){
+  if(!confirm('この学習記録を削除しますか？'))return;
+  S.logs=S.logs.filter(l=>l.id!==id);save();renderLog();
+}
+
+function renderLog(){
+  renderLogStats();
+  renderLogBarChart();
+  renderMaterialList();
+  renderAnalysis(_analysisPeriod);
+  renderLogList();
+}
+
+function renderLogStats(){
+  const t=todayStr(),ws=weekStart(),ms=monthStart();
+  let today=0,week=0,month=0,total=0;
+  S.logs.forEach(l=>{const m=l.mins||0;total+=m;if(l.date===t)today+=m;if(l.date>=ws)week+=m;if(l.date&&l.date.startsWith(ms))month+=m;});
+  document.getElementById('logStats').innerHTML=[
+    {l:'今日',v:fmtMins(today)},{l:'今週',v:fmtMins(week)},{l:'今月',v:fmtMins(month)},{l:'累計',v:fmtMins(total)}
+  ].map(s=>`<div class="stat-c"><div class="stat-v">${esc(s.v)}</div><div class="stat-l">${s.l}</div></div>`).join('');
+}
+
+function renderLogBarChart(){
+  const labels=[],data=[];
+  for(let i=13;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const ds=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+    const tot=S.logs.filter(l=>l.date===ds).reduce((a,l)=>a+(l.mins||0),0);
+    labels.push((d.getMonth()+1)+'/'+d.getDate());data.push(tot>0?Math.round(tot/6)/10:0);
+  }
+  makeChart('logBarChart',{type:'bar',data:{labels,datasets:[{label:'学習時間(h)',data,backgroundColor:'rgba(14,165,233,.18)',borderColor:'#0EA5E9',borderWidth:1.5,borderRadius:4}]},options:{...CHART_OPTS,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.parsed.y}時間`}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>v+'h',font:{size:10},color:'#7B8AB8'},grid:{color:'rgba(99,120,210,0.08)'},border:{display:false}},x:{ticks:{font:{size:10},color:'#7B8AB8',maxRotation:0},grid:{display:false},border:{display:false}}}}});
+}
+
+let _analysisPeriod='all';
+function setAnalysisPeriod(p,btn){
+  _analysisPeriod=p;
+  document.querySelectorAll('#analysisPeriodTabs .ptab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAnalysis(p);
+}
+function renderAnalysis(period){
+  const logs=getLogsInPeriod(period);
+  const subjMap={},matMap={};
+  logs.forEach(l=>{
+    const m=l.mins||0;
+    const s=l.matSubject||'その他';
+    subjMap[s]=(subjMap[s]||0)+m;
+    const mn=l.matName||'不明';
+    matMap[mn]=(matMap[mn]||0)+m;
+  });
+  const sortedSubj=Object.entries(subjMap).sort((a,b)=>b[1]-a[1]);
+  const sortedMat=Object.entries(matMap).sort((a,b)=>b[1]-a[1]);
+  const maxSubj=sortedSubj.length?sortedSubj[0][1]:1;
+  const maxMat=sortedMat.length?sortedMat[0][1]:1;
+  const el=document.getElementById('analysisContent');
+  if(!logs.length){el.innerHTML='<div style="font-size:13px;color:var(--ink3);padding:.5rem 0;">この期間に記録がありません</div>';return;}
+  el.innerHTML=`
+    <div class="sec-t" style="margin-bottom:.5rem;">教科別学習時間</div>
+    ${sortedSubj.map(([s,m],i)=>`<div class="rank-row"><span class="rank-num-b">${i+1}</span><span class="rank-name">${esc(s)}</span><div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:${Math.round(m/maxSubj*100)}%;"></div></div><span class="rank-time">${fmtMins(m)}</span></div>`).join('')}
+    <hr class="div">
+    <div class="sec-t" style="margin-bottom:.5rem;">教材別学習時間</div>
+    ${sortedMat.map(([mn,m],i)=>`<div class="rank-row"><span class="rank-num-b">${i+1}</span><span class="rank-name">${esc(mn)}</span><div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:${Math.round(m/maxMat*100)}%;background:linear-gradient(90deg,#0EA5E9,#06B6D4);"></div></div><span class="rank-time">${fmtMins(m)}</span></div>`).join('')}
+  `;
+}
+
+function renderLogList(){
+  const el=document.getElementById('logList');
+  document.getElementById('logCount').textContent=S.logs.length+'件の記録';
+  if(!S.logs.length){el.innerHTML=`<div class="empty"><i class="ti ti-clock" aria-hidden="true"></i><div class="empty-t">学習記録がありません</div></div>`;return;}
+  el.innerHTML=S.logs.map(l=>`
+    <div class="log-item">
+      <div class="log-head"><div style="flex:1;"><div class="log-date">${l.date||'—'}</div><div class="log-mat">${esc(l.matName||'—')}</div></div>${l.mins?`<span class="log-chip">${durText(l.start,l.end)}</span>`:''}</div>
+      <div class="log-meta">${l.matSubject?`<span class="bdg bdg-blue">${esc(l.matSubject)}</span>`:''} ${l.matType?`<span class="bdg bdg-gray">${esc(l.matType)}</span>`:''} ${l.start&&l.end?`<span style="color:var(--ink3);">${l.start}〜${l.end}</span>`:''}</div>
+      ${l.memo?`<div class="log-memo">${esc(l.memo)}</div>`:''}
+      <div class="log-actions">
+        <button class="btn btn-s" onclick="openEditLog(${l.id})"><i class="ti ti-pencil" aria-hidden="true"></i>編集</button>
+        <button class="btn btn-s btn-d" onclick="deleteLog(${l.id})"><i class="ti ti-trash" aria-hidden="true"></i>削除</button>
+      </div>
+    </div>`).join('');
+}
+
+/* ══════════════════════════════════════
+   TIMER
+══════════════════════════════════════ */
+let timerMode='normal', timerState='idle';
+let timerInterval=null, timerSeconds=0;
+let pomoPhase='work', pomoSet=0, POMO_WORK=25*60, POMO_REST=5*60;
+
+function setTimerMode(mode,btn){
+  if(timerState!=='idle'){alert('タイマーを停止してからモードを変更してください');return;}
+  timerMode=mode;
+  document.querySelectorAll('.timer-mode-tabs .ptab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  timerReset();
+  const dots=document.getElementById('pomoDots');
+  if(mode==='pomo'){dots.style.display='flex';renderPomoDots();}
+  else dots.style.display='none';
+  document.getElementById('timerSub').textContent=mode==='pomo'?'25分集中 → 5分休憩':'開始ボタンで計測開始';
+}
+
+function renderPomoDots(){
+  document.getElementById('pomoDots').innerHTML=[0,1,2,3].map(i=>`<div class="pomo-dot${i<pomoSet?' done':''}"></div>`).join('');
+}
+
+function timerStart(){
+  if(timerMode==='pomo'){timerSeconds=POMO_WORK;pomoPhase='work';pomoSet=0;renderPomoDots();}
+  timerState='running';
+  document.getElementById('timerStartBtn').style.display='none';
+  document.getElementById('timerPauseBtn').style.display='';
+  document.getElementById('timerStopBtn').style.display='';
+  document.getElementById('timerResetBtn').style.display='';
+  if(timerMode==='pomo')document.getElementById('timerSub').textContent=`\u{1F4D8} 集中中 (1/4)`;
+  timerInterval=setInterval(timerTick,1000);
+}
+function timerPause(){
+  clearInterval(timerInterval);timerState='paused';
+  document.getElementById('timerPauseBtn').style.display='none';
+  document.getElementById('timerResumeBtn').style.display='';
+}
+function timerResume(){
+  timerState='running';
+  document.getElementById('timerResumeBtn').style.display='none';
+  document.getElementById('timerPauseBtn').style.display='';
+  timerInterval=setInterval(timerTick,1000);
+}
+function timerStop(){
+  clearInterval(timerInterval);timerState='idle';
+  const recorded=timerMode==='pomo'?(pomoSet*POMO_WORK + (POMO_WORK-timerSeconds>0&&pomoPhase==='work'?(POMO_WORK-timerSeconds):0)):timerSeconds;
+  timerReset();
+  if(recorded>0)openTimerSave(recorded);
+}
+function timerReset(){
+  clearInterval(timerInterval);timerState='idle';timerSeconds=0;pomoPhase='work';pomoSet=0;
+  document.getElementById('timerFace').textContent='00:00';
+  document.getElementById('timerSub').textContent=timerMode==='pomo'?'25分集中 → 5分休憩':'開始ボタンで計測開始';
+  document.getElementById('timerStartBtn').style.display='';
+  document.getElementById('timerPauseBtn').style.display='none';
+  document.getElementById('timerResumeBtn').style.display='none';
+  document.getElementById('timerStopBtn').style.display='none';
+  document.getElementById('timerResetBtn').style.display='none';
+  if(timerMode==='pomo')renderPomoDots();
+}
+function timerTick(){
+  if(timerMode==='normal'){
+    timerSeconds++;
+    const m=Math.floor(timerSeconds/60),s=timerSeconds%60;
+    document.getElementById('timerFace').textContent=pad(m)+':'+pad(s);
+  } else {
+    timerSeconds--;
+    if(timerSeconds<=0){
+      if(pomoPhase==='work'){
+        pomoSet++;renderPomoDots();
+        if(pomoSet>=4){pomoSet=0;timerSeconds=0;timerStop();return;}
+        pomoPhase='rest';timerSeconds=POMO_REST;
+        document.getElementById('timerSub').textContent='\u{1F389} 休憩タイム！5分';
+      } else {
+        pomoPhase='work';timerSeconds=POMO_WORK;
+        document.getElementById('timerSub').textContent=`\u{1F4D8} 集中中 (${pomoSet+1}/4)`;
+      }
+    }
+    const m=Math.floor(timerSeconds/60),s=timerSeconds%60;
+    document.getElementById('timerFace').textContent=pad(m)+':'+pad(s);
+    if(timerSeconds>0)document.getElementById('timerSub').textContent=pomoPhase==='work'?`\u{1F4D8} 集中中 (${pomoSet+1}/4)`:`\u{1F389} 休憩タイム`;
+  }
+}
+
+let _timerRecordedMins=0;
+function openTimerSave(secs){
+  _timerRecordedMins=Math.max(1,Math.round(secs/60));
+  populateMatSelects();
+  document.getElementById('timerDate').value=todayStr();
+  document.getElementById('timerMat').value='';
+  document.getElementById('timerMemo').value='';
+  const f=document.getElementById('timerSaveForm');
+  f.classList.add('open');
+  f.scrollIntoView({behavior:'smooth'});
+  f.querySelector('.fp-t').innerHTML=`<i class="ti ti-device-floppy" aria-hidden="true"></i> ${fmtMins(_timerRecordedMins)} を記録に保存`;
+}
+function closeTimerSave(){document.getElementById('timerSaveForm').classList.remove('open');}
+function saveTimerLog(){
+  const matId=parseInt(document.getElementById('timerMat').value);
+  if(!matId){alert('教材を選択してください');return;}
+  const mat=S.materials.find(m=>m.id===matId)||{name:'不明',subject:'',type:''};
+  const date=document.getElementById('timerDate').value;
+  const memo=document.getElementById('timerMemo').value.trim();
+  const end=new Date();
+  const start=new Date(end.getTime()-_timerRecordedMins*60000);
+  const fmt=d=>pad(d.getHours())+':'+pad(d.getMinutes());
+  S.logs.unshift({id:Date.now(),date,matId,matName:mat.name,matSubject:mat.subject,matType:mat.type,start:fmt(start),end:fmt(end),mins:_timerRecordedMins,memo});
+  save();closeTimerSave();
+  alert(`${fmtMins(_timerRecordedMins)}を記録に保存しました！`);
+}
+
+/* ══════════════════════════════════════
+   CALENDAR
+══════════════════════════════════════ */
+let calYear=new Date().getFullYear();
+let calMonth=new Date().getMonth(); // 0-indexed
+let calSelectedDate=todayStr();
+
+function calMonthShift(n){
+  calMonth+=n;
+  if(calMonth<0){calMonth=11;calYear--;}
+  if(calMonth>11){calMonth=0;calYear++;}
+  renderCalendar();
+}
+
+function renderCalendar(){
+  document.getElementById('calMonthLabel').textContent=`${calYear}年 ${calMonth+1}月`;
+  const grid=document.getElementById('calGrid');
+  const dowLabels=['月','火','水','木','金','土','日'];
+  let html=dowLabels.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+
+  const firstDay=new Date(calYear,calMonth,1);
+  const startOffset=(firstDay.getDay()+6)%7; // Monday=0
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const prevMonthDays=new Date(calYear,calMonth,0).getDate();
+  const todayS=todayStr();
+
+  // eventsByDate
+  const evByDate={};
+  S.events.forEach(e=>{if(e.date){(evByDate[e.date]=evByDate[e.date]||[]).push(e);}});
+
+  // prev month tail
+  for(let i=0;i<startOffset;i++){
+    const dayNum=prevMonthDays-startOffset+1+i;
+    html+=`<div class="cal-cell other-month"><div class="cal-day-num">${dayNum}</div></div>`;
+  }
+  // this month
+  for(let day=1;day<=daysInMonth;day++){
+    const ds=calYear+'-'+pad(calMonth+1)+'-'+pad(day);
+    const isToday=ds===todayS;
+    const evs=evByDate[ds]||[];
+    let dots='';
+    evs.slice(0,3).forEach(e=>{
+      const color=e.type==='submission'?'#EA580C':(CAT_INFO[e.category]?CAT_INFO[e.category].color:'#2563EB');
+      dots+=`<div class="cal-event-dot" style="background:${color};"></div>`;
+    });
+    html+=`<div class="cal-cell${isToday?' today':''}" onclick="selectCalDate('${ds}')">
+      <div class="cal-day-num">${day}</div>
+      ${dots}
+    </div>`;
+  }
+  // next month head
+  const totalCells=startOffset+daysInMonth;
+  const remainder=(7-(totalCells%7))%7;
+  for(let i=1;i<=remainder;i++){
+    html+=`<div class="cal-cell other-month"><div class="cal-day-num">${i}</div></div>`;
+  }
+  grid.innerHTML=html;
+  renderSubmissionList();
+  renderDayEvents();
+}
+
+function selectCalDate(ds){
+  calSelectedDate=ds;
+  document.getElementById('evDate').value=ds;
+  renderDayEvents();
+  document.getElementById('dayEventsTitle').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function toggleEventForm(){
+  const f=document.getElementById('addEventForm');
+  if(!f.classList.contains('open')){
+    f.classList.add('open');
+    document.getElementById('evDate').value=calSelectedDate||todayStr();
+    document.getElementById('evTitle').value='';
+    document.getElementById('evTime').value='';
+    document.getElementById('evContent').value='';
+    document.getElementById('evSubject').value='';
+    document.getElementById('evType').value='event';
+    document.getElementById('evCategory').value='study';
+    document.getElementById('evStatus').value='todo';
+    toggleEvTypeFields();
+    setTimeout(()=>document.getElementById('evTitle').focus(),50);
+  }else f.classList.remove('open');
+}
+function closeEventForm(){document.getElementById('addEventForm').classList.remove('open');}
+function toggleEvTypeFields(){
+  const t=document.getElementById('evType').value;
+  document.getElementById('evEventFields').style.display=t==='event'?'':'none';
+  document.getElementById('evSubFields').style.display=t==='submission'?'':'none';
+}
+function addEvent(){
+  const title=document.getElementById('evTitle').value.trim();
+  if(!title){document.getElementById('evTitle').focus();return;}
+  const type=document.getElementById('evType').value;
+  const date=document.getElementById('evDate').value;
+  const ev={id:Date.now(),type,title,date};
+  if(type==='event'){
+    ev.time=document.getElementById('evTime').value;
+    ev.category=document.getElementById('evCategory').value;
+    ev.content=document.getElementById('evContent').value.trim();
+  } else {
+    ev.subject=document.getElementById('evSubject').value.trim();
+    ev.status=document.getElementById('evStatus').value;
+  }
+  S.events.push(ev);
+  save();closeEventForm();renderCalendar();
+}
+function deleteEvent(id){
+  if(!confirm('この予定を削除しますか？'))return;
+  S.events=S.events.filter(e=>e.id!==id);
+  save();renderCalendar();
+}
+function cycleSubStatus(id){
+  const e=S.events.find(e=>e.id===id);
+  if(!e)return;
+  e.status=SUB_STATUS_NEXT[e.status]||'todo';
+  save();renderCalendar();renderDash();
+}
+
+function renderSubmissionList(){
+  const el=document.getElementById('submissionList');
+  const subs=[...S.events].filter(e=>e.type==='submission').sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  if(!subs.length){el.innerHTML=`<div style="font-size:13px;color:var(--ink3);padding:.25rem 0;">提出物はまだ登録されていません</div>`;return;}
+  el.innerHTML=subs.map(s=>{
+    const days=daysUntil(s.date);
+    const overdue=days!==null&&days<0&&s.status!=='done';
+    return `<div class="event-item">
+      <div class="event-color-bar" style="background:${s.status==='done'?'var(--green)':overdue?'var(--red)':'var(--orange)'};"></div>
+      <div class="event-body">
+        <div class="event-title">${esc(s.title)}</div>
+        <div class="event-meta">${s.subject?esc(s.subject)+' · ':''}${s.date||'—'}${days!==null?` (${days>=0?'あと'+days+'日':(-days)+'日遅れ'})`:''}</div>
+      </div>
+      <span class="sub-status sub-${s.status}" onclick="cycleSubStatus(${s.id})">${SUB_STATUS_LABEL[s.status]}</span>
+      <button class="btn btn-s btn-d" onclick="deleteEvent(${s.id})" style="margin-left:6px;"><i class="ti ti-trash" aria-hidden="true"></i></button>
+    </div>`;
+  }).join('');
+}
+
+function renderDayEvents(){
+  const el=document.getElementById('dayEventsList');
+  const titleEl=document.getElementById('dayEventsTitle');
+  const ds=calSelectedDate;
+  titleEl.textContent=ds?`${ds} の予定`:'予定一覧';
+  const evs=S.events.filter(e=>e.date===ds&&e.type==='event').sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  if(!evs.length){el.innerHTML=`<div style="font-size:13px;color:var(--ink3);">この日の予定はありません</div>`;return;}
+  el.innerHTML=evs.map(e=>{
+    const cat=CAT_INFO[e.category]||CAT_INFO.other;
+    return `<div class="event-item">
+      <div class="event-color-bar" style="background:${cat.color};"></div>
+      <div class="event-body">
+        <div class="event-title">${cat.emoji} ${esc(e.title)}</div>
+        <div class="event-meta">${e.time?e.time+' · ':''}${cat.label}${e.content?' · '+esc(e.content):''}</div>
+      </div>
+      <button class="btn btn-s btn-d" onclick="deleteEvent(${e.id})"><i class="ti ti-trash" aria-hidden="true"></i></button>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════
+   BOOKS
+══════════════════════════════════════ */
+let pendingPhoto=null, dragSrcId=null;
+let booksSection='owned'; // 'owned' | 'wish'
+let unitFormBookId=null;
+
+function setBooksSection(section){
+  booksSection=section;
+  document.getElementById('booksOwnedTab').classList.toggle('active',section==='owned');
+  document.getElementById('booksWishTab').classList.toggle('active',section==='wish');
+  closeBookForm();closeUnitForm();
+  renderBooks();
+}
+
+function toggleBookForm(){
+  const f=document.getElementById('addBookForm');
+  if(!f.classList.contains('open')){
+    f.classList.add('open');
+    ['bookTitle','bookSubj','bookMemo'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('bookPri').value='高';
+    clearPhoto();
+    setTimeout(()=>document.getElementById('bookTitle').focus(),50);
+  }else f.classList.remove('open');
+}
+function closeBookForm(){document.getElementById('addBookForm').classList.remove('open');pendingPhoto=null;}
+function previewPhoto(e){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();r.onload=ev=>{
+    pendingPhoto=ev.target.result;
+    const img=document.getElementById('photoPreview');img.src=pendingPhoto;img.style.display='block';
+    document.getElementById('clearPhotoBtn').style.display='';
+  };r.readAsDataURL(file);
+}
+function clearPhoto(){pendingPhoto=null;document.getElementById('photoInput').value='';const img=document.getElementById('photoPreview');img.src='';img.style.display='none';document.getElementById('clearPhotoBtn').style.display='none';}
+function addBook(){
+  const title=document.getElementById('bookTitle').value.trim();if(!title){document.getElementById('bookTitle').focus();return;}
+  S.books.push({id:Date.now(),title,subject:document.getElementById('bookSubj').value.trim(),priority:document.getElementById('bookPri').value,memo:document.getElementById('bookMemo').value.trim(),photo:pendingPhoto||null,list:booksSection,units:[]});
+  save();closeBookForm();renderBooks();
+}
+function deleteBook(id){
+  const idx=S.books.findIndex(b=>b.id===id);if(idx<0)return;
+  if(!confirm(`「${S.books[idx].title}」を削除しますか？`))return;
+  S.books.splice(idx,1);save();renderBooks();
+}
+function moveBookToOwned(id){
+  const b=S.books.find(b=>b.id===id);if(!b)return;
+  b.list='owned';save();renderBooks();
+}
+
+function renderBooks(){
+  const filtered=S.books.filter(b=>b.list===booksSection);
+  const n=filtered.length;
+  document.getElementById('bookCount').textContent=n+'冊';
+  document.getElementById('addUnitForm').classList.remove('open');
+  const list=document.getElementById('booksList');
+  if(!n){
+    const emptyMsg=booksSection==='owned'?'購入済みの参考書がまだありません':'購入予定の参考書がまだありません';
+    list.innerHTML=`<div class="empty"><i class="ti ti-books" aria-hidden="true"></i><div class="empty-t">${emptyMsg}</div></div>`;return;
+  }
+  list.innerHTML=filtered.map((b,i)=>{
+    const units=b.units||[];
+    const doneCount=units.filter(u=>u.status==='done').length;
+    const pct=units.length?Math.round(doneCount/units.length*100):0;
+    return `<div class="book-card" data-id="${b.id}" draggable="true"
+      ondragstart="bDs(event,${b.id})" ondragover="bDo(event,${b.id})" ondragleave="bDl(event)" ondrop="bDrop(event,${b.id})">
+      <div class="rank-c">${i+1}</div>
+      <div class="book-cover">${b.photo?`<img src="${b.photo}" alt="${esc(b.title)}">`:`<i class="ti ti-book-2" aria-hidden="true"></i>`}</div>
+      <div class="book-body">
+        <div class="book-title">${esc(b.title)}</div>
+        <div class="book-tags"><span class="bdg ${PRI_BADGE[b.priority]||'bdg-gray'}">${PRI_LABEL[b.priority]||b.priority}</span>${b.subject?`<span class="bdg bdg-sky">${esc(b.subject)}</span>`:''}</div>
+        ${b.memo?`<div class="book-memo">${esc(b.memo)}</div>`:''}
+        ${booksSection==='owned'?`
+          ${units.length?`
+            <div style="margin-top:.6rem;">
+              <div class="prog-label" style="margin-bottom:4px;"><span>進捗</span><span>${doneCount} / ${units.length} ユニット完了（${pct}%）</span></div>
+              <div class="prog-bar"><div class="prog-fill green" style="width:${pct}%;"></div></div>
+            </div>
+            <div class="unit-list">
+              ${units.map(u=>`<div class="unit-item">
+                <span class="unit-name">${esc(u.name)}</span>
+                <select class="unit-status-sel ${u.status==='done'?'done':u.status==='progress'?'progress':''}" onchange="updateUnitStatus(${b.id},${u.id},this.value)">
+                  <option value="todo" ${u.status==='todo'?'selected':''}>未着手</option>
+                  <option value="progress" ${u.status==='progress'?'selected':''}>学習中</option>
+                  <option value="done" ${u.status==='done'?'selected':''}>完了</option>
+                </select>
+                <button class="unit-del-btn" onclick="deleteUnit(${b.id},${u.id})"><i class="ti ti-x" aria-hidden="true"></i></button>
+              </div>`).join('')}
+            </div>
+          `:''}
+        `:''}
+        <div class="book-actions">
+          ${booksSection==='owned'?`<button class="btn btn-s" onclick="openUnitForm(${b.id})"><i class="ti ti-list-details" aria-hidden="true"></i>ユニット追加</button>`:`<button class="btn btn-s btn-t" onclick="moveBookToOwned(${b.id})"><i class="ti ti-shopping-cart-check" aria-hidden="true"></i>購入済みに移動</button>`}
+          <button class="btn btn-s btn-d" onclick="deleteBook(${b.id})"><i class="ti ti-trash" aria-hidden="true"></i>削除</button>
+        </div>
+      </div>
+      <div class="drag-h" title="ドラッグして並び替え"><i class="ti ti-grip-vertical" aria-hidden="true"></i></div>
+    </div>`;
+  }).join('');
+  setupTouchDrag();
+}
+
+/* ── Units ── */
+function openUnitForm(bookId){
+  unitFormBookId=bookId;
+  const f=document.getElementById('addUnitForm');
+  f.classList.add('open');
+  document.getElementById('unitName').value='';
+  document.getElementById('unitStatus').value='todo';
+  f.scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(()=>document.getElementById('unitName').focus(),50);
+}
+function closeUnitForm(){document.getElementById('addUnitForm').classList.remove('open');unitFormBookId=null;}
+function addUnit(){
+  if(!unitFormBookId)return;
+  const name=document.getElementById('unitName').value.trim();
+  if(!name){document.getElementById('unitName').focus();return;}
+  const b=S.books.find(b=>b.id===unitFormBookId);
+  if(!b)return;
+  if(!b.units)b.units=[];
+  b.units.push({id:Date.now(),name,status:document.getElementById('unitStatus').value});
+  save();closeUnitForm();renderBooks();
+}
+function updateUnitStatus(bookId,unitId,status){
+  const b=S.books.find(b=>b.id===bookId);if(!b)return;
+  const u=b.units.find(u=>u.id===unitId);if(!u)return;
+  u.status=status;save();renderBooks();
+}
+function deleteUnit(bookId,unitId){
+  const b=S.books.find(b=>b.id===bookId);if(!b)return;
+  b.units=b.units.filter(u=>u.id!==unitId);
+  save();renderBooks();
+}
+
+/* ── Drag & drop ── */
+function bDs(e,id){dragSrcId=id;e.dataTransfer.effectAllowed='move';e.currentTarget.classList.add('dragging');}
+function bDo(e,id){e.preventDefault();document.querySelectorAll('.book-card').forEach(c=>c.classList.remove('drag-over'));e.currentTarget.classList.add('drag-over');}
+function bDl(e){e.currentTarget.classList.remove('drag-over');}
+function bDrop(e,id){
+  e.preventDefault();document.querySelectorAll('.book-card').forEach(c=>c.classList.remove('drag-over','dragging'));
+  if(dragSrcId===id)return;
+  const si=S.books.findIndex(b=>b.id===dragSrcId),ti=S.books.findIndex(b=>b.id===id);
+  if(si<0||ti<0)return;
+  const[item]=S.books.splice(si,1);S.books.splice(ti,0,item);save();renderBooks();
+}
+function setupTouchDrag(){
+  let touchSrcId=null,clone=null,touchOffX=0,touchOffY=0;
+  document.querySelectorAll('.drag-h').forEach(h=>{
+    h.addEventListener('touchstart',e=>{
+      const card=h.closest('.book-card');if(!card)return;
+      touchSrcId=parseInt(card.dataset.id);
+      const t=e.touches[0],rect=card.getBoundingClientRect();
+      touchOffX=t.clientX-rect.left;touchOffY=t.clientY-rect.top;
+      clone=card.cloneNode(true);
+      clone.style.cssText=`position:fixed;top:${rect.top}px;left:${rect.left}px;width:${rect.width}px;opacity:.85;pointer-events:none;z-index:9999;box-shadow:0 8px 32px rgba(37,99,235,.2);border-radius:16px;`;
+      document.body.appendChild(clone);card.style.opacity='.3';e.preventDefault();
+    },{passive:false});
+    h.addEventListener('touchmove',e=>{
+      if(!clone)return;const t=e.touches[0];
+      clone.style.top=(t.clientY-touchOffY)+'px';clone.style.left=(t.clientX-touchOffX)+'px';
+      document.querySelectorAll('.book-card').forEach(c=>c.classList.remove('drag-over'));
+      const under=document.elementFromPoint(t.clientX,t.clientY);
+      if(under){const uc=under.closest('.book-card');if(uc&&parseInt(uc.dataset.id)!==touchSrcId)uc.classList.add('drag-over');}
+      e.preventDefault();
+    },{passive:false});
+    h.addEventListener('touchend',e=>{
+      if(!clone)return;const t=e.changedTouches[0];
+      if(clone.parentNode)clone.parentNode.removeChild(clone);clone=null;
+      document.querySelectorAll('.book-card').forEach(c=>{c.classList.remove('drag-over');c.style.opacity='';});
+      const under=document.elementFromPoint(t.clientX,t.clientY);
+      if(under){const tc=under.closest('.book-card');if(tc){const tid=parseInt(tc.dataset.id);if(tid&&tid!==touchSrcId){const si=S.books.findIndex(b=>b.id===touchSrcId),ti2=S.books.findIndex(b=>b.id===tid);if(si>=0&&ti2>=0){const[item]=S.books.splice(si,1);S.books.splice(ti2,0,item);save();}}}}
+      touchSrcId=null;renderBooks();
+    });
+  });
+}
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+load();
+renderDash();
+</script>
+</body>
+</html>
