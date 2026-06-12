@@ -344,6 +344,417 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 @media(min-width:768px){
   .score-table-wrap{max-height:500px;overflow-y:auto;}
 }
+
+/* ─── Study Planner 2026 redesign ─── */
+:root{
+  --bg:#F4F7FC;
+  --bg2:#EAF0FA;
+  --surf:#FFFFFF;
+  --surf2:#F7F9FD;
+  --surf3:#EDF2F9;
+  --border:#DCE4F0;
+  --border2:#C8D4E5;
+  --ink:#0B1833;
+  --ink2:#3C4A64;
+  --ink3:#71809A;
+  --ink4:#A8B4C7;
+  --blue:#1768F2;
+  --blue2:#0D4FD0;
+  --blue3:#6A9CFF;
+  --sky:#2F80ED;
+  --cyan:#1FB6C9;
+  --indigo:#4557E8;
+  --acc:#1768F2;
+  --acc-bg:#EDF4FF;
+  --acc-bg2:#DCEAFF;
+  --green:#0A9B6F;
+  --green-bg:#DDF8EF;
+  --amber:#D88716;
+  --amber-bg:#FFF1D8;
+  --red:#D84545;
+  --red-bg:#FDE7E7;
+  --orange:#E36E18;
+  --orange-bg:#FFF0E3;
+  --purple:#7654D8;
+  --purple-bg:#EEE9FF;
+  --grad1:linear-gradient(135deg,#1768F2 0%,#4387FF 100%);
+  --grad2:linear-gradient(135deg,#233FCA 0%,#1768F2 100%);
+  --grad3:linear-gradient(135deg,#1677E8 0%,#1FB6C9 100%);
+  --shadow-sm:0 1px 2px rgba(11,24,51,.03),0 4px 14px rgba(30,62,112,.05);
+  --shadow-md:0 8px 28px rgba(30,62,112,.10);
+  --shadow-lg:0 18px 50px rgba(6,31,75,.18);
+  --r8:10px;--r12:14px;--r16:18px;--r20:22px;--r24:28px;
+}
+html{background:var(--bg);}
+body{
+  font-family:Inter,'Noto Sans JP','Hiragino Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:
+    radial-gradient(circle at 92% 5%,rgba(80,137,255,.09),transparent 28rem),
+    var(--bg);
+  font-size:14px;
+  line-height:1.7;
+}
+button,input,textarea,select{font:inherit;}
+::selection{background:#BFD5FF;color:var(--ink);}
+
+.hdr{
+  position:fixed;
+  inset:0 auto 0 0;
+  width:236px;
+  height:100vh;
+  border:0;
+  background:linear-gradient(180deg,#071F46 0%,#082B5D 55%,#061C3D 100%);
+  box-shadow:10px 0 34px rgba(5,25,58,.08);
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+.hdr::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 20% 5%,rgba(62,134,255,.20),transparent 30%),
+    linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px);
+  background-size:auto,100% 42px;
+}
+.hdr-in{
+  position:relative;
+  height:100%;
+  max-width:none;
+  padding:30px 20px 24px;
+  flex-direction:column;
+  align-items:stretch;
+  gap:0;
+}
+.logo{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  box-shadow:0 8px 24px rgba(0,0,0,.25);
+}
+.logo-t{
+  position:absolute;
+  left:74px;
+  top:34px;
+  width:130px;
+  color:#fff;
+  background:none;
+  -webkit-text-fill-color:currentColor;
+  font-size:17px;
+  font-weight:760;
+  line-height:1.15;
+  letter-spacing:-.035em;
+}
+.nav-tabs{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  margin:42px 0 0;
+  overflow:visible;
+}
+.ntab{
+  width:100%;
+  min-height:46px;
+  justify-content:flex-start;
+  gap:13px;
+  padding:11px 14px;
+  border:1px solid transparent;
+  border-radius:12px;
+  color:#B9C8DF;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:.01em;
+}
+.ntab i{width:20px;font-size:20px;text-align:center;color:#D5E2F4;}
+.ntab:hover{background:rgba(255,255,255,.07);color:#fff;}
+.ntab.active{
+  color:#fff;
+  background:linear-gradient(135deg,#1469F6,#4B8BFF);
+  border-color:rgba(255,255,255,.16);
+  box-shadow:0 10px 24px rgba(0,74,211,.32),inset 0 1px rgba(255,255,255,.2);
+}
+.ntab.active i{color:#fff;}
+.ntab:focus{outline:none;}
+.ntab:focus-visible{box-shadow:0 0 0 3px rgba(113,165,255,.45);}
+.ntab.active:focus-visible{box-shadow:0 0 0 3px rgba(113,165,255,.45),0 10px 24px rgba(0,74,211,.32);}
+
+.page{
+  max-width:1280px;
+  margin:0 auto 0 calc(236px + max(0px,(100vw - 1516px)/2));
+  padding:42px 38px 72px;
+}
+.pg-title,.dash-title{
+  font-size:30px;
+  line-height:1.25;
+  font-weight:800;
+  letter-spacing:-.045em;
+  color:var(--ink);
+  margin:0 0 5px;
+}
+.pg-sub,.dash-sub{font-size:13px;color:var(--ink3);margin-bottom:28px;}
+.sec-t{color:var(--ink3);font-size:10px;letter-spacing:.14em;}
+
+.card,.book-card,.log-item,.mock-card,.mat-row,.event-item,.sum-c,.stat-c,.dash-stat{
+  border:1px solid var(--border);
+  box-shadow:var(--shadow-sm);
+}
+.card{
+  border-radius:var(--r16);
+  margin-bottom:18px;
+  transition:box-shadow .2s ease,transform .2s ease,border-color .2s ease;
+}
+.card:hover{box-shadow:var(--shadow-md);border-color:#CBD8EA;}
+.ch{min-height:56px;padding:15px 20px;border-bottom-color:var(--border);}
+.ch-t{font-size:14px;font-weight:750;letter-spacing:-.015em;}
+.cb{padding:20px;}
+
+.btn{
+  min-height:39px;
+  gap:7px;
+  padding:8px 15px;
+  border-width:1px;
+  border-radius:10px;
+  font-size:12px;
+  font-weight:700;
+  box-shadow:0 1px 2px rgba(11,24,51,.03);
+}
+.btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm);}
+.btn:active{transform:translateY(0) scale(.98);}
+.btn-p,.btn-save{
+  background:linear-gradient(135deg,#1768F2,#357FFF);
+  box-shadow:0 8px 18px rgba(23,104,242,.22);
+}
+.btn-p:hover,.btn-save:hover{background:linear-gradient(135deg,#0D58DF,#2874F8);box-shadow:0 10px 22px rgba(23,104,242,.28);}
+.btn-s{min-height:31px;padding:5px 10px;}
+.btn-save{max-width:360px;margin:8px auto 0;}
+
+.fpanel{
+  padding:22px;
+  border:1px solid #C9D8ED;
+  border-radius:var(--r16);
+  background:linear-gradient(145deg,#F8FBFF,#F1F6FD);
+  box-shadow:var(--shadow-md);
+}
+.fp-t{font-size:14px;color:var(--ink);font-weight:750;}
+label.fl{font-size:10px;letter-spacing:.08em;color:#596982;}
+input[type=text],input[type=date],input[type=time],input[type=number],textarea,select{
+  min-height:42px;
+  border:1px solid var(--border2);
+  border-radius:10px;
+  padding:9px 12px;
+  background:#fff;
+  color:var(--ink);
+}
+input:focus,textarea:focus,select:focus{border-color:#4E8EFF;box-shadow:0 0 0 4px rgba(23,104,242,.11);}
+
+.dash-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;}
+.dash-date{font-size:12px;color:var(--ink3);font-weight:600;}
+.dash-primary{display:grid;grid-template-columns:minmax(300px,.82fr) minmax(420px,1.35fr);gap:18px;margin-bottom:18px;}
+.dash-primary .card{margin:0;}
+.countdown-wrap{
+  height:100%;
+  min-height:276px;
+  margin:0;
+  padding:28px;
+  border-radius:var(--r20);
+  text-align:left;
+  display:grid;
+  align-content:center;
+  justify-items:start;
+  background:
+    radial-gradient(circle at 78% 30%,rgba(73,148,255,.42),transparent 27%),
+    linear-gradient(145deg,#061D46 0%,#0A3D82 58%,#08295B 100%);
+  box-shadow:var(--shadow-lg);
+}
+.countdown-wrap::before{
+  top:auto;right:28px;bottom:32px;
+  width:150px;height:150px;
+  border:18px solid rgba(255,255,255,.12);
+  background:transparent;
+}
+.countdown-wrap::after{
+  left:auto;right:46px;bottom:50px;
+  width:114px;height:114px;
+  border:12px solid #4B91FF;
+  border-left-color:rgba(255,255,255,.55);
+  background:transparent;
+}
+.cd-label{font-size:11px;letter-spacing:.12em;margin:0 0 13px;}
+.cd-name{font-size:18px;margin:0 0 8px;max-width:58%;}
+.cd-days{font-size:76px;line-height:.95;text-shadow:0 6px 24px rgba(0,0,0,.2);}
+.cd-unit{font-size:13px;margin-top:8px;}
+.countdown-empty{align-content:end;min-height:276px;}
+.countdown-empty .cd-name{max-width:78%;font-size:23px;line-height:1.45;margin-bottom:8px;}
+.countdown-empty .cd-unit{max-width:72%;font-weight:500;opacity:.72;line-height:1.65;}
+.countdown-empty .btn{margin-top:18px;background:#fff;color:#0C4FC5;border:0;box-shadow:0 8px 22px rgba(0,0,0,.16);}
+.dash-chart-card .chart-wrap-sm{height:222px;}
+.dash-focus{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:16px 18px;
+  border:1px solid #BFD3F7;
+  border-radius:var(--r16);
+  background:linear-gradient(90deg,#EEF5FF,#F8FBFF);
+  color:#19457F;
+}
+.dash-focus i{font-size:24px;color:var(--blue);}
+.dash-focus-copy{flex:1;font-weight:700;letter-spacing:-.01em;}
+
+.dash-grid{grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;}
+.dash-stat{
+  min-height:116px;
+  padding:22px 18px;
+  border-radius:var(--r16);
+  text-align:left;
+  position:relative;
+  overflow:hidden;
+}
+.dash-stat::after{
+  content:'';
+  position:absolute;
+  right:-18px;bottom:-24px;
+  width:74px;height:74px;border-radius:50%;
+  background:rgba(23,104,242,.055);
+}
+.ds-val{
+  font-size:25px!important;
+  color:var(--ink);
+  background:none;
+  -webkit-text-fill-color:currentColor;
+  letter-spacing:-.045em;
+  font-variant-numeric:tabular-nums;
+}
+.dash-stat:last-child .ds-val{font-size:17px!important;}
+.ds-label{font-size:10px;letter-spacing:.08em;margin-top:8px;}
+.streak-card{
+  border:1px solid #FFDBA7;
+  border-radius:var(--r16);
+  background:linear-gradient(135deg,#FFF8EA,#FFF0D3);
+  box-shadow:none;
+}
+.streak-num{font-size:28px;}
+
+.sum-row,.stat-grid{gap:14px;}
+.sum-c,.stat-c{padding:18px 14px;border-radius:var(--r16);text-align:left;}
+.sum-v,.stat-v{
+  color:var(--ink);
+  background:none;
+  -webkit-text-fill-color:currentColor;
+  font-size:21px;
+}
+.sum-l,.stat-l{margin-top:6px;}
+
+.exam-tabs,.period-tabs,.books-section-tabs{
+  gap:6px;
+  padding:5px;
+  width:max-content;
+  max-width:100%;
+  border:1px solid var(--border);
+  border-radius:13px;
+  background:#EAF0F8;
+  overflow-x:auto;
+}
+.etab,.ptab,.bstab{border:0;background:transparent;border-radius:9px;}
+.etab.active,.ptab.active,.bstab.active{
+  background:#fff;
+  color:var(--blue);
+  box-shadow:0 3px 10px rgba(24,55,98,.10);
+}
+
+.score-table thead th{background:#F0F4FA;border-bottom:1px solid var(--border);padding:12px 9px;}
+.score-table tbody td{padding:11px 9px;}
+.score-table tbody tr{transition:background .15s;}
+.score-table tbody tr:hover{background:#F6F9FE;}
+.score-inp-t{border-radius:8px;background:#F7F9FC;}
+
+.book-card,.log-item,.mock-card,.mat-row,.event-item{border-radius:var(--r16);}
+.book-card{padding:18px 20px;gap:16px;}
+.book-card:hover{transform:translateY(-2px);border-color:#BFD1EA;}
+.book-cover{width:62px;height:82px;border-radius:10px;}
+.book-title,.log-mat,.mock-name,.mat-name,.event-title{font-weight:750;letter-spacing:-.015em;}
+.rank-c{background:#E7F0FF;color:var(--blue);box-shadow:none;}
+.unit-item,.range-item,.mock-sc{background:#F5F8FC;border-color:var(--border);}
+
+.timer-display{padding:42px 20px 38px;}
+.timer-face{
+  font-size:94px;
+  color:var(--ink);
+  background:none;
+  -webkit-text-fill-color:currentColor;
+  letter-spacing:-.065em;
+}
+.timer-mode-tabs{width:max-content;margin:0 auto 30px;padding:5px;border:1px solid var(--border);border-radius:13px;background:#EDF2F8;}
+
+.cal-grid{gap:7px;}
+.cal-cell{min-height:92px;padding:9px;border-radius:12px;}
+.cal-cell.today{border-width:1px;box-shadow:inset 0 0 0 1px var(--blue);}
+.cal-day-num{font-size:12px;}
+
+.empty{padding:54px 20px;}
+.empty i{width:68px;height:68px;margin:0 auto 16px;display:grid;place-items:center;border-radius:20px;background:#EAF2FF;opacity:1;font-size:30px;}
+
+@media(max-width:980px){
+  .hdr{width:84px;}
+  .hdr-in{padding:24px 14px;}
+  .logo{margin:0 auto;}
+  .logo-t{display:none;}
+  .nav-tabs{margin-top:35px;}
+  .ntab{justify-content:center;padding:11px;}
+  .ntab span{display:none;}
+  .page{margin-left:84px;padding:32px 24px 64px;}
+  .dash-primary{grid-template-columns:1fr;}
+  .countdown-wrap{min-height:240px;}
+}
+@media(max-width:680px){
+  body{padding-bottom:74px;}
+  .hdr{
+    inset:auto 0 0;
+    width:100%;
+    height:70px;
+    background:rgba(7,31,70,.96);
+    box-shadow:0 -8px 28px rgba(5,25,58,.16);
+  }
+  .hdr-in{padding:7px 8px;height:100%;display:block;}
+  .logo,.logo-t{display:none;}
+  .nav-tabs{height:100%;margin:0;display:grid;grid-template-columns:repeat(6,1fr);gap:2px;}
+  .ntab{min-height:56px;padding:5px 2px;flex-direction:column;justify-content:center;gap:2px;border-radius:10px;font-size:9px;}
+  .ntab span{display:block;}
+  .ntab i{font-size:20px;}
+  .ntab.active{box-shadow:none;}
+  .page{margin:0;padding:25px 16px 32px;}
+  .pg-title,.dash-title{font-size:25px;}
+  .pg-sub,.dash-sub{margin-bottom:22px;}
+  .dash-head{align-items:flex-start;}
+  .dash-primary{grid-template-columns:1fr;gap:14px;}
+  .countdown-wrap{min-height:226px;padding:23px;}
+  .cd-days{font-size:64px;}
+  .countdown-empty{min-height:218px;}
+  .countdown-empty .cd-name{font-size:20px;line-height:1.4;}
+  .countdown-empty .cd-unit{font-size:11px;line-height:1.55;}
+  .countdown-empty .btn{margin-top:13px;}
+  .countdown-wrap::before{right:12px;bottom:28px;width:120px;height:120px;}
+  .countdown-wrap::after{right:28px;bottom:44px;width:88px;height:88px;}
+  .dash-chart-card .chart-wrap-sm{height:150px;}
+  .dash-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .dash-stat{min-height:105px;padding:17px 14px;}
+  .sum-row,.stat-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .card{border-radius:15px;}
+  .ch{padding:13px 15px;}
+  .cb{padding:15px;}
+  .fg2,.fg3,.fg4{grid-template-columns:1fr;}
+  .timer-face{font-size:60px;}
+  .cal-grid{gap:3px;}
+  .cal-cell{min-height:58px;padding:5px 3px;border-radius:8px;}
+  .book-card{padding:14px;gap:10px;}
+  .book-cover{width:48px;height:64px;}
+  .dash-focus{align-items:flex-start;flex-wrap:wrap;}
+  .dash-focus .btn{width:100%;justify-content:center;}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important;}
+}
 </style>
 </head>
 <body>
@@ -365,14 +776,27 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
 <!-- ══════════════ DASHBOARD ══════════════ -->
 <div class="page active" id="tab-dash">
-  <div id="dash-countdown"></div>
+  <div class="dash-head">
+    <div>
+      <h1 class="dash-title">ホーム</h1>
+      <p class="dash-sub">今日の積み重ねを、次の成果へ。</p>
+    </div>
+    <div class="dash-date" id="dashDateLabel"></div>
+  </div>
+  <div class="dash-primary">
+    <div id="dash-countdown"></div>
+    <div class="card dash-chart-card">
+      <div class="ch"><i class="ti ti-chart-area" aria-hidden="true" style="color:var(--blue);font-size:17px;"></i><span class="ch-t">今月の学習時間</span></div>
+      <div class="cb"><div class="chart-wrap-sm"><canvas id="dashLogChart"></canvas></div></div>
+    </div>
+  </div>
   <div class="dash-grid" id="dash-stats"></div>
   <div id="dash-streak"></div>
   <div id="dash-due"></div>
-
-  <div class="card">
-    <div class="ch"><i class="ti ti-chart-area" aria-hidden="true" style="color:var(--blue);font-size:17px;"></i><span class="ch-t">今月の学習時間</span></div>
-    <div class="cb"><div class="chart-wrap-sm"><canvas id="dashLogChart"></canvas></div></div>
+  <div class="dash-focus">
+    <i class="ti ti-rocket" aria-hidden="true"></i>
+    <div class="dash-focus-copy">継続は力なり。今日の一歩が、未来の自分をつくる。</div>
+    <button class="btn btn-p" onclick="switchTab('timer')"><i class="ti ti-player-play" aria-hidden="true"></i>学習を始める</button>
   </div>
 </div>
 
@@ -771,7 +1195,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <button class="btn btn-p" onclick="toggleBookForm()"><i class="ti ti-plus" aria-hidden="true"></i>参考書を追加</button>
   </div>
   <div class="fpanel" id="addBookForm">
-    <div class="fp-t"><i class="ti ti-book-upload" aria-hidden="true"></i>参考書を登録</div>
+    <div class="fp-t" id="bookFormTitle"><i class="ti ti-book-upload" aria-hidden="true"></i>参考書を登録</div>
     <label class="fl">書名 *</label>
     <input type="text" id="bookTitle" placeholder="例：青チャート 数学I+A" autocomplete="off">
     <div class="fg2">
@@ -790,7 +1214,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       <button class="btn btn-s" id="clearPhotoBtn" style="display:none;" onclick="clearPhoto()"><i class="ti ti-x" aria-hidden="true"></i></button>
     </div>
     <div class="fa">
-      <button class="btn btn-p" onclick="addBook()"><i class="ti ti-check" aria-hidden="true"></i>登録</button>
+      <button class="btn btn-p" id="bookSaveBtn" onclick="saveBook()"><i class="ti ti-check" aria-hidden="true"></i><span>登録</span></button>
       <button class="btn" onclick="closeBookForm()">キャンセル</button>
     </div>
   </div>
@@ -912,6 +1336,7 @@ function switchTab(tab){
   document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.add('active');
   document.getElementById('nav-'+tab).classList.add('active');
+  window.scrollTo(0,0);
   if(tab==='dash')renderDash();
   if(tab==='scores')renderScores();
   if(tab==='log')renderLog();
@@ -945,11 +1370,18 @@ function getLogsInPeriod(period){
    DASHBOARD
 ══════════════════════════════════════ */
 function renderDash(){
+  renderDashDate();
   renderCountdown();
   renderDashStats();
   renderStreak();
   renderDashDue();
   renderDashChart();
+}
+
+function renderDashDate(){
+  const el=document.getElementById('dashDateLabel');
+  if(!el)return;
+  el.textContent=new Intl.DateTimeFormat('ja-JP',{month:'long',day:'numeric',weekday:'short'}).format(new Date());
 }
 
 function renderCountdown(){
@@ -960,7 +1392,15 @@ function renderCountdown(){
     .map(e=>({name:e.name,d:new Date(e.date+'T00:00:00')}))
     .filter(e=>e.d>=today)
     .sort((a,b)=>a.d-b.d);
-  if(!upcoming.length){el.innerHTML='';return;}
+  if(!upcoming.length){
+    el.innerHTML=`<div class="countdown-wrap countdown-empty">
+      <div class="cd-label">次の目標を設定</div>
+      <div class="cd-name">試験日を登録して、学習のペースをつくろう。</div>
+      <div class="cd-unit">成績画面から試験日を設定すると、ここにカウントダウンが表示されます。</div>
+      <button class="btn" onclick="switchTab('scores')"><i class="ti ti-calendar-plus" aria-hidden="true"></i>試験日を登録</button>
+    </div>`;
+    return;
+  }
   const next=upcoming[0];
   const days=Math.round((next.d-today)/(1000*60*60*24));
   el.innerHTML=`<div class="countdown-wrap">
@@ -1782,6 +2222,7 @@ function renderDayEvents(){
 let pendingPhoto=null, dragSrcId=null;
 let booksSection='owned'; // 'owned' | 'wish'
 let unitFormBookId=null;
+let editingBookId=null;
 const expandedUnitBookIds=new Set();
 
 function setBooksSection(section){
@@ -1795,14 +2236,47 @@ function setBooksSection(section){
 function toggleBookForm(){
   const f=document.getElementById('addBookForm');
   if(!f.classList.contains('open')){
+    editingBookId=null;
     f.classList.add('open');
     ['bookTitle','bookSubj','bookMemo'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('bookPri').value='高';
     clearPhoto();
+    setBookFormMode(false);
     setTimeout(()=>document.getElementById('bookTitle').focus(),50);
-  }else f.classList.remove('open');
+  }else closeBookForm();
 }
-function closeBookForm(){document.getElementById('addBookForm').classList.remove('open');pendingPhoto=null;}
+function setBookFormMode(isEditing){
+  document.getElementById('bookFormTitle').innerHTML=isEditing
+    ?'<i class="ti ti-edit" aria-hidden="true"></i>参考書を編集'
+    :'<i class="ti ti-book-upload" aria-hidden="true"></i>参考書を登録';
+  document.querySelector('#bookSaveBtn span').textContent=isEditing?'変更を保存':'登録';
+}
+function closeBookForm(){
+  document.getElementById('addBookForm').classList.remove('open');
+  document.getElementById('photoInput').value='';
+  pendingPhoto=null;
+  editingBookId=null;
+  setBookFormMode(false);
+}
+function editBook(id){
+  const b=S.books.find(book=>book.id===id);if(!b)return;
+  editingBookId=id;
+  pendingPhoto=b.photo||null;
+  document.getElementById('bookTitle').value=b.title||'';
+  document.getElementById('bookSubj').value=b.subject||'';
+  document.getElementById('bookPri').value=b.priority||'高';
+  document.getElementById('bookMemo').value=b.memo||'';
+  document.getElementById('photoInput').value='';
+  const img=document.getElementById('photoPreview');
+  img.src=pendingPhoto||'';
+  img.style.display=pendingPhoto?'block':'none';
+  document.getElementById('clearPhotoBtn').style.display=pendingPhoto?'':'none';
+  setBookFormMode(true);
+  const f=document.getElementById('addBookForm');
+  f.classList.add('open');
+  f.scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(()=>document.getElementById('bookTitle').focus(),50);
+}
 function previewPhoto(e){
   const file=e.target.files[0];if(!file)return;
   const r=new FileReader();r.onload=ev=>{
@@ -1812,9 +2286,21 @@ function previewPhoto(e){
   };r.readAsDataURL(file);
 }
 function clearPhoto(){pendingPhoto=null;document.getElementById('photoInput').value='';const img=document.getElementById('photoPreview');img.src='';img.style.display='none';document.getElementById('clearPhotoBtn').style.display='none';}
-function addBook(){
+function saveBook(){
   const title=document.getElementById('bookTitle').value.trim();if(!title){document.getElementById('bookTitle').focus();return;}
-  S.books.push({id:Date.now(),title,subject:document.getElementById('bookSubj').value.trim(),priority:document.getElementById('bookPri').value,memo:document.getElementById('bookMemo').value.trim(),photo:pendingPhoto||null,list:booksSection,units:[]});
+  const values={
+    title,
+    subject:document.getElementById('bookSubj').value.trim(),
+    priority:document.getElementById('bookPri').value,
+    memo:document.getElementById('bookMemo').value.trim(),
+    photo:pendingPhoto||null
+  };
+  if(editingBookId!==null){
+    const b=S.books.find(book=>book.id===editingBookId);if(!b)return;
+    Object.assign(b,values);
+  }else{
+    S.books.push({id:Date.now(),...values,list:booksSection,units:[]});
+  }
   save();closeBookForm();renderBooks();
 }
 function deleteBook(id){
@@ -1873,6 +2359,7 @@ function renderBooks(){
           `:''}
         `:''}
         <div class="book-actions">
+          <button class="btn btn-s" type="button" onclick="event.stopPropagation();editBook(${b.id})"><i class="ti ti-edit" aria-hidden="true"></i>編集</button>
           ${booksSection==='owned'?`
             <button class="btn btn-s unit-toggle" type="button" aria-expanded="${unitsExpanded}" onclick="event.stopPropagation();toggleUnits(${b.id})"><i class="ti ti-chevron-down" aria-hidden="true"></i>ユニット${units.length?` (${units.length})`:''}</button>
             <button class="btn btn-s" type="button" onclick="event.stopPropagation();openUnitForm(${b.id})"><i class="ti ti-plus" aria-hidden="true"></i>追加</button>
