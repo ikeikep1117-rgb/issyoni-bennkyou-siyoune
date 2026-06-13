@@ -128,6 +128,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
 .fg4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;}
+.fg5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
 .fa{display:flex;gap:8px;margin-top:1rem;padding-top:1rem;border-top:1.5px solid var(--border);flex-wrap:wrap;}
 .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;gap:8px;flex-wrap:wrap;}
 .tb-label{font-size:13px;color:var(--ink3);}
@@ -334,7 +335,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   .stat-grid{grid-template-columns:repeat(2,1fr);}
   .mock-scores{grid-template-columns:repeat(3,1fr);}
   .rank-chart-pair{grid-template-columns:1fr;}
-  .fg2,.fg3,.fg4{grid-template-columns:1fr;}
+  .fg2,.fg3,.fg4,.fg5{grid-template-columns:1fr;}
   .ntab span{display:none;}
   .ntab{padding:5px 8px;}
   .timer-face{font-size:54px;}
@@ -342,7 +343,6 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   .cal-day-num{font-size:11px;}
 }
 @media(min-width:768px){
-  .score-table-wrap{max-height:500px;overflow-y:auto;}
 }
 
 /* ─── Study Planner 2026 redesign ─── */
@@ -877,9 +877,10 @@ input:focus,textarea:focus,select:focus{border-color:#4E8EFF;box-shadow:0 0 0 4p
     <div class="card">
       <div class="ch"><i class="ti ti-award" aria-hidden="true" style="color:var(--blue);font-size:17px;"></i><span class="ch-t">合計・順位</span></div>
       <div class="cb">
-        <div class="fg4">
-          <div><label class="fl">合計点（自動計算）</label><input type="number" id="metaTotal" min="0" placeholder="—" oninput="updateMeta('total',this.value)"></div>
-          <div><label class="fl">クラス平均合計</label><input type="number" id="metaAvg" min="0" step=".1" placeholder="—" oninput="updateMeta('average',this.value)"></div>
+        <div class="fg5">
+          <div><label class="fl">合計点（自動計算）</label><input type="number" id="metaTotal" min="0" placeholder="—" readonly style="background:var(--surf3);"></div>
+          <div><label class="fl">クラス平均合計（自動計算）</label><input type="number" id="metaAvg" min="0" step=".1" placeholder="—" readonly style="background:var(--surf3);"></div>
+          <div><label class="fl">学年平均合計（自動計算）</label><input type="number" id="metaGradeAvg" min="0" step=".1" placeholder="—" readonly style="background:var(--surf3);"></div>
           <div><label class="fl">学年順位</label><input type="number" id="metaGrade" min="1" placeholder="—" oninput="updateMeta('gradeRank',this.value)"></div>
           <div><label class="fl">クラス順位</label><input type="number" id="metaClass" min="1" placeholder="—" oninput="updateMeta('classRank',this.value)"></div>
         </div>
@@ -1240,6 +1241,10 @@ input:focus,textarea:focus,select:focus{border-color:#4E8EFF;box-shadow:0 0 0 4p
 
 <style>
 .dur-disp{padding:9px 8px;background:var(--acc-bg2);border-radius:var(--r8);font-size:14px;font-weight:700;color:var(--blue);text-align:center;min-height:38px;display:flex;align-items:center;justify-content:center;}
+.wish-subject-group{margin-bottom:0.75rem;}
+.wish-subject-hdr{width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--surf);border:1px solid var(--border);border-radius:var(--r12);cursor:pointer;font-weight:700;color:var(--ink);text-align:left;transition:all 0.15s;box-shadow:var(--shadow-sm);gap:8px;}
+.wish-subject-hdr:hover{border-color:var(--blue3);background:var(--surf2);}
+.wish-subject-body{margin-top:0.5rem;padding-left:0.5rem;border-left:2px dashed var(--border);}
 </style>
 <script>
 'use strict';
@@ -1264,7 +1269,7 @@ const SUB_STATUS_LABEL={todo:'未着手',doing:'作成中',done:'提出済み'};
 const SUB_STATUS_NEXT={todo:'doing',doing:'done',done:'todo'};
 
 function makeExam(name){
-  return {name,date:'',subjects:{},hidden:{},classAvgs:{},gradeAvgs:{},total:'',average:'',gradeRank:'',classRank:'',ranges:[]};
+  return {name,date:'',subjects:{},hidden:{},classAvgs:{},gradeAvgs:{},total:'',average:'',gradeAvgTotal:'',gradeRank:'',classRank:'',ranges:[]};
 }
 
 let S = {
@@ -1543,7 +1548,7 @@ function renderSummary(){
 
 function renderSubjectTable(){
   const ex=getExam();
-  const subjects=Object.keys(ex.subjects);
+  const subjects=Object.keys(ex.subjects).sort((a,b)=>!!ex.hidden[a]-!!ex.hidden[b]);
   const tbody=document.getElementById('subjectTableBody');
   if(!subjects.length){tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--ink3);padding:1.5rem 0;">↓ 教科を追加してください</td></tr>`;return;}
   tbody.innerHTML=subjects.map(s=>{
@@ -1604,12 +1609,37 @@ function deleteSubject(name){
 function saveScores(){
   const ex=getExam();
   const subjects=Object.keys(ex.subjects).filter(s=>!ex.hidden[s]);
+  
   const scores=subjects.map(s=>ex.subjects[s]).filter(v=>v!=='').map(Number);
   if(scores.length>0){
     const total=scores.reduce((a,b)=>a+b,0);
     ex.total=total;
     document.getElementById('metaTotal').value=total;
+  } else {
+    ex.total='';
+    document.getElementById('metaTotal').value='';
   }
+
+  const classAvgs=subjects.map(s=>ex.classAvgs[s]).filter(v=>v!=='').map(Number);
+  if(classAvgs.length>0){
+    const classTotal=classAvgs.reduce((a,b)=>a+b,0);
+    ex.average=classTotal;
+    document.getElementById('metaAvg').value=classTotal.toFixed(1);
+  } else {
+    ex.average='';
+    document.getElementById('metaAvg').value='';
+  }
+
+  const gradeAvgs=subjects.map(s=>ex.gradeAvgs[s]).filter(v=>v!=='').map(Number);
+  if(gradeAvgs.length>0){
+    const gradeTotal=gradeAvgs.reduce((a,b)=>a+b,0);
+    ex.gradeAvgTotal=gradeTotal;
+    document.getElementById('metaGradeAvg').value=gradeTotal.toFixed(1);
+  } else {
+    ex.gradeAvgTotal='';
+    document.getElementById('metaGradeAvg').value='';
+  }
+
   save();
   renderSummary();
   renderTotalChart();
@@ -1623,6 +1653,7 @@ function fillMeta(){
   const ex=getExam();
   document.getElementById('metaTotal').value=ex.total||'';
   document.getElementById('metaAvg').value=ex.average||'';
+  document.getElementById('metaGradeAvg').value=ex.gradeAvgTotal||'';
   document.getElementById('metaGrade').value=ex.gradeRank||'';
   document.getElementById('metaClass').value=ex.classRank||'';
 }
@@ -2224,6 +2255,13 @@ let booksSection='owned'; // 'owned' | 'wish'
 let unitFormBookId=null;
 let editingBookId=null;
 const expandedUnitBookIds=new Set();
+const expandedWishSubjects=new Set();
+
+function toggleWishSubject(subj){
+  if(expandedWishSubjects.has(subj)){expandedWishSubjects.delete(subj);}
+  else{expandedWishSubjects.add(subj);}
+  renderBooks();
+}
 
 function setBooksSection(section){
   booksSection=section;
@@ -2326,20 +2364,61 @@ function renderBooks(){
     const emptyMsg=booksSection==='owned'?'購入済みの参考書がまだありません':'購入予定の参考書がまだありません';
     list.innerHTML=`<div class="empty"><i class="ti ti-books" aria-hidden="true"></i><div class="empty-t">${emptyMsg}</div></div>`;return;
   }
-  list.innerHTML=filtered.map((b,i)=>{
-    const units=b.units||[];
-    const doneCount=units.filter(u=>u.status==='done').length;
-    const pct=units.length?Math.round(doneCount/units.length*100):0;
-    const unitsExpanded=expandedUnitBookIds.has(b.id);
-    return `<div class="book-card" data-id="${b.id}"
-      ondragover="bDo(event,${b.id})" ondragleave="bDl(event)" ondrop="bDrop(event,${b.id})">
-      <div class="rank-c">${i+1}</div>
-      <div class="book-cover">${b.photo?`<img src="${b.photo}" alt="${esc(b.title)}">`:`<i class="ti ti-book-2" aria-hidden="true"></i>`}</div>
-      <div class="book-body">
-        <div class="book-title">${esc(b.title)}</div>
-        <div class="book-tags"><span class="bdg ${PRI_BADGE[b.priority]||'bdg-gray'}">${PRI_LABEL[b.priority]||b.priority}</span>${b.subject?`<span class="bdg bdg-sky">${esc(b.subject)}</span>`:''}</div>
-        ${b.memo?`<div class="book-memo">${esc(b.memo)}</div>`:''}
-        ${booksSection==='owned'?`
+  if(booksSection==='wish'){
+    const groups={};
+    filtered.forEach(b=>{
+      const subj=(b.subject&&b.subject.trim())?b.subject.trim():'未分類';
+      if(!groups[subj])groups[subj]=[];
+      groups[subj].push(b);
+    });
+    list.innerHTML=Object.entries(groups).map(([subj,books])=>{
+      const isExpanded=expandedWishSubjects.has(subj);
+      const chevron=isExpanded?'ti-chevron-up':'ti-chevron-down';
+      const booksHtml=books.map((b,i)=>{
+        return `<div class="book-card" data-id="${b.id}" style="margin-bottom:0.5rem;"
+          ondragover="bDo(event,${b.id})" ondragleave="bDl(event)" ondrop="bDrop(event,${b.id})">
+          <div class="rank-c">${i+1}</div>
+          <div class="book-cover">${b.photo?`<img src="${b.photo}" alt="${esc(b.title)}">`:`<i class="ti ti-book-2" aria-hidden="true"></i>`}</div>
+          <div class="book-body">
+            <div class="book-title">${esc(b.title)}</div>
+            <div class="book-tags"><span class="bdg ${PRI_BADGE[b.priority]||'bdg-gray'}">${PRI_LABEL[b.priority]||b.priority}</span></div>
+            ${b.memo?`<div class="book-memo">${esc(b.memo)}</div>`:''}
+            <div class="book-actions">
+              <button class="btn btn-s" type="button" onclick="event.stopPropagation();editBook(${b.id})"><i class="ti ti-edit" aria-hidden="true"></i>編集</button>
+              <button class="btn btn-s btn-t" type="button" onclick="event.stopPropagation();moveBookToOwned(${b.id})"><i class="ti ti-shopping-cart-check" aria-hidden="true"></i>購入済みに移動</button>
+              <button class="btn btn-s btn-d" type="button" onclick="event.stopPropagation();deleteBook(${b.id})"><i class="ti ti-trash" aria-hidden="true"></i>削除</button>
+            </div>
+          </div>
+          <div class="drag-h" draggable="true" ondragstart="bDs(event,${b.id})" title="ドラッグして並び替え"><i class="ti ti-grip-vertical" aria-hidden="true"></i></div>
+        </div>`;
+      }).join('');
+      return `<div class="wish-subject-group">
+        <button class="wish-subject-hdr" type="button" onclick="toggleWishSubject('${esc(subj)}')">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="bdg bdg-sky" style="font-size:12px;padding:3px 9px;">${esc(subj)}</span>
+            <span style="font-size:13px;color:var(--ink3);font-weight:600;">(${books.length}冊)</span>
+          </div>
+          <i class="ti ${chevron}" aria-hidden="true"></i>
+        </button>
+        <div class="wish-subject-body" style="display:${isExpanded?'block':'none'};">
+          ${booksHtml}
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    list.innerHTML=filtered.map((b,i)=>{
+      const units=b.units||[];
+      const doneCount=units.filter(u=>u.status==='done').length;
+      const pct=units.length?Math.round(doneCount/units.length*100):0;
+      const unitsExpanded=expandedUnitBookIds.has(b.id);
+      return `<div class="book-card" data-id="${b.id}"
+        ondragover="bDo(event,${b.id})" ondragleave="bDl(event)" ondrop="bDrop(event,${b.id})">
+        <div class="rank-c">${i+1}</div>
+        <div class="book-cover">${b.photo?`<img src="${b.photo}" alt="${esc(b.title)}">`:`<i class="ti ti-book-2" aria-hidden="true"></i>`}</div>
+        <div class="book-body">
+          <div class="book-title">${esc(b.title)}</div>
+          <div class="book-tags"><span class="bdg ${PRI_BADGE[b.priority]||'bdg-gray'}">${PRI_LABEL[b.priority]||b.priority}</span>${b.subject?`<span class="bdg bdg-sky">${esc(b.subject)}</span>`:''}</div>
+          ${b.memo?`<div class="book-memo">${esc(b.memo)}</div>`:''}
           ${units.length?`
             <div style="margin-top:.6rem;">
               <div class="prog-label" style="margin-bottom:4px;"><span>進捗</span><span>${doneCount} / ${units.length} ユニット完了（${pct}%）</span></div>
@@ -2357,19 +2436,17 @@ function renderBooks(){
               </div>`).join('')}
             </div>`:''}
           `:''}
-        `:''}
-        <div class="book-actions">
-          <button class="btn btn-s" type="button" onclick="event.stopPropagation();editBook(${b.id})"><i class="ti ti-edit" aria-hidden="true"></i>編集</button>
-          ${booksSection==='owned'?`
+          <div class="book-actions">
+            <button class="btn btn-s" type="button" onclick="event.stopPropagation();editBook(${b.id})"><i class="ti ti-edit" aria-hidden="true"></i>編集</button>
             <button class="btn btn-s unit-toggle" type="button" aria-expanded="${unitsExpanded}" onclick="event.stopPropagation();toggleUnits(${b.id})"><i class="ti ti-chevron-down" aria-hidden="true"></i>ユニット${units.length?` (${units.length})`:''}</button>
             <button class="btn btn-s" type="button" onclick="event.stopPropagation();openUnitForm(${b.id})"><i class="ti ti-plus" aria-hidden="true"></i>追加</button>
-          `:`<button class="btn btn-s btn-t" type="button" onclick="event.stopPropagation();moveBookToOwned(${b.id})"><i class="ti ti-shopping-cart-check" aria-hidden="true"></i>購入済みに移動</button>`}
-          <button class="btn btn-s btn-d" type="button" onclick="event.stopPropagation();deleteBook(${b.id})"><i class="ti ti-trash" aria-hidden="true"></i>削除</button>
+            <button class="btn btn-s btn-d" type="button" onclick="event.stopPropagation();deleteBook(${b.id})"><i class="ti ti-trash" aria-hidden="true"></i>削除</button>
+          </div>
         </div>
-      </div>
-      <div class="drag-h" draggable="true" ondragstart="bDs(event,${b.id})" title="ドラッグして並び替え"><i class="ti ti-grip-vertical" aria-hidden="true"></i></div>
-    </div>`;
-  }).join('');
+        <div class="drag-h" draggable="true" ondragstart="bDs(event,${b.id})" title="ドラッグして並び替え"><i class="ti ti-grip-vertical" aria-hidden="true"></i></div>
+      </div>`;
+    }).join('');
+  }
   setupTouchDrag();
 }
 
