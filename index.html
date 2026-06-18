@@ -718,7 +718,7 @@ input:focus,textarea:focus,select:focus{border-color:#4E8EFF;box-shadow:0 0 0 4p
   }
   .hdr-in{padding:7px 8px;height:100%;display:block;}
   .logo,.logo-t{display:none;}
-  .nav-tabs{height:100%;margin:0;display:grid;grid-template-columns:repeat(6,1fr);gap:2px;}
+  .nav-tabs{height:100%;margin:0;display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
   .ntab{min-height:56px;padding:5px 2px;flex-direction:column;justify-content:center;gap:2px;border-radius:10px;font-size:9px;}
   .ntab span{display:block;}
   .ntab i{font-size:20px;}
@@ -770,6 +770,7 @@ input:focus,textarea:focus,select:focus{border-color:#4E8EFF;box-shadow:0 0 0 4p
     <button class="ntab" id="nav-timer" onclick="switchTab('timer')"><i class="ti ti-hourglass" aria-hidden="true"></i><span>タイマー</span></button>
     <button class="ntab" id="nav-cal" onclick="switchTab('cal')"><i class="ti ti-calendar" aria-hidden="true"></i><span>カレンダー</span></button>
     <button class="ntab" id="nav-books" onclick="switchTab('books')"><i class="ti ti-books" aria-hidden="true"></i><span>参考書</span></button>
+    <button class="ntab" id="nav-otp" onclick="switchTab('otp')"><i class="ti ti-lock" aria-hidden="true"></i><span>OTP</span></button>
   </div>
 </div>
 </header>
@@ -1239,12 +1240,69 @@ input:focus,textarea:focus,select:focus{border-color:#4E8EFF;box-shadow:0 0 0 4p
 </div>
 
 
+<!-- ══════════════ OTP ══════════════ -->
+<div class="page" id="tab-otp">
+  <h1 class="pg-title">ワンタイムパスコード</h1>
+  <p class="pg-sub">TOTP認証コードを管理（Google Authenticator互換）</p>
+
+  <div class="toolbar">
+    <span class="tb-label" id="otpCount">0件のアカウント</span>
+    <button class="btn btn-p" onclick="toggleOtpForm()"><i class="ti ti-plus" aria-hidden="true"></i>アカウントを追加</button>
+  </div>
+
+  <div class="fpanel" id="addOtpForm">
+    <div class="fp-t"><i class="ti ti-lock" aria-hidden="true"></i>アカウントを登録</div>
+    <label class="fl">アカウント名 *</label>
+    <input type="text" id="otpName" placeholder="例：Google / GitHub" autocomplete="off">
+    <label class="fl">シークレットキー *（Base32）</label>
+    <input type="text" id="otpSecret" placeholder="例：JBSWY3DPEHPK3PXP" autocomplete="off" style="font-family:monospace;letter-spacing:.06em;">
+    <div class="fg2" style="margin-top:8px;">
+      <div><label class="fl">発行者（任意）</label><input type="text" id="otpIssuer" placeholder="例：Google" autocomplete="off"></div>
+      <div><label class="fl">桁数</label>
+        <select id="otpDigits"><option value="6">6桁</option><option value="8">8桁</option></select>
+      </div>
+    </div>
+    <div class="fa">
+      <button class="btn btn-p" onclick="saveOtpAccount()"><i class="ti ti-check" aria-hidden="true"></i>追加</button>
+      <button class="btn" onclick="closeOtpForm()">キャンセル</button>
+    </div>
+  </div>
+
+  <div id="otpList"></div>
+</div>
+
 <style>
 .dur-disp{padding:9px 8px;background:var(--acc-bg2);border-radius:var(--r8);font-size:14px;font-weight:700;color:var(--blue);text-align:center;min-height:38px;display:flex;align-items:center;justify-content:center;}
-.wish-subject-group{margin-bottom:0.75rem;}
-.wish-subject-hdr{width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--surf);border:1px solid var(--border);border-radius:var(--r12);cursor:pointer;font-weight:700;color:var(--ink);text-align:left;transition:all 0.15s;box-shadow:var(--shadow-sm);gap:8px;}
-.wish-subject-hdr:hover{border-color:var(--blue3);background:var(--surf2);}
-.wish-subject-body{margin-top:0.5rem;padding-left:0.5rem;border-left:2px dashed var(--border);}
+.wish-tabs{
+  display:flex;
+  gap:6px;
+  padding:5px;
+  width:max-content;
+  max-width:100%;
+  border:1px solid var(--border);
+  border-radius:13px;
+  background:#EAF0F8;
+  overflow-x:auto;
+  margin-bottom:1rem;
+}
+
+/* ─── OTP ─── */
+.otp-card{background:var(--surf);border:1px solid var(--border);border-radius:var(--r16);padding:18px 20px;margin-bottom:.75rem;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:16px;transition:all .2s;}
+.otp-card:hover{box-shadow:var(--shadow-md);border-color:#BFD1EA;transform:translateY(-1px);}
+.otp-ring-wrap{position:relative;flex-shrink:0;width:56px;height:56px;}
+.otp-ring{transform:rotate(-90deg);overflow:visible;}
+.otp-ring-bg{fill:none;stroke:#E8EFF8;stroke-width:4;}
+.otp-ring-fg{fill:none;stroke:url(#otpGrad);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .8s linear;}
+.otp-body{flex:1;min-width:0;}
+.otp-name{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.otp-issuer{font-size:11px;color:var(--ink3);margin-bottom:8px;}
+.otp-code{font-size:32px;font-weight:900;letter-spacing:.18em;font-variant-numeric:tabular-nums;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer;transition:opacity .15s;user-select:all;}
+.otp-code:hover{opacity:.75;}
+.otp-code.copied{opacity:.4;}
+.otp-secs{font-size:11px;color:var(--ink3);font-weight:600;margin-top:2px;}
+.otp-actions{display:flex;gap:6px;flex-shrink:0;}
+.otp-copied-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0A3D82;color:#fff;font-size:13px;font-weight:700;padding:10px 22px;border-radius:100px;box-shadow:0 8px 28px rgba(5,25,58,.22);pointer-events:none;opacity:0;transition:opacity .25s;z-index:9999;}
+.otp-copied-toast.show{opacity:1;}
 </style>
 <script>
 'use strict';
@@ -1280,7 +1338,8 @@ let S = {
   logs: [],
   mockTests: [],
   events: [],
-  analysisPeriod: 'all'
+  analysisPeriod: 'all',
+  otpAccounts: []
 };
 
 function load(){
@@ -1317,6 +1376,7 @@ function load(){
   if(!Array.isArray(S.mockTests))S.mockTests=[];
   if(!Array.isArray(S.events))S.events=[];
   if(!S.analysisPeriod)S.analysisPeriod='all';
+  if(!Array.isArray(S.otpAccounts))S.otpAccounts=[];
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 
@@ -1347,6 +1407,8 @@ function switchTab(tab){
   if(tab==='log')renderLog();
   if(tab==='cal')renderCalendar();
   if(tab==='books')renderBooks();
+  if(tab==='otp'){renderOtp();startOtpTick();}
+  else stopOtpTick();
 }
 
 /* ══════════════════════════════════════
@@ -2255,11 +2317,9 @@ let booksSection='owned'; // 'owned' | 'wish'
 let unitFormBookId=null;
 let editingBookId=null;
 const expandedUnitBookIds=new Set();
-const expandedWishSubjects=new Set();
-
-function toggleWishSubject(subj){
-  if(expandedWishSubjects.has(subj)){expandedWishSubjects.delete(subj);}
-  else{expandedWishSubjects.add(subj);}
+let activeWishSubject=null;
+function selectWishSubject(subj){
+  activeWishSubject=subj;
   renderBooks();
 }
 
@@ -2371,11 +2431,21 @@ function renderBooks(){
       if(!groups[subj])groups[subj]=[];
       groups[subj].push(b);
     });
-    list.innerHTML=Object.entries(groups).map(([subj,books])=>{
-      const isExpanded=expandedWishSubjects.has(subj);
-      const chevron=isExpanded?'ti-chevron-up':'ti-chevron-down';
-      const booksHtml=books.map((b,i)=>{
-        return `<div class="book-card" data-id="${b.id}" style="margin-bottom:0.5rem;"
+    const subjects=Object.keys(groups);
+    if(subjects.length>0){
+      if(!activeWishSubject||!groups[activeWishSubject]){
+        activeWishSubject=subjects[0];
+      }
+      const tabsHtml=`<div class="wish-tabs">`+
+        subjects.map(subj=>{
+          const isActive=subj===activeWishSubject;
+          const count=groups[subj].length;
+          return `<button class="bstab ${isActive?'active':''}" onclick="selectWishSubject('${esc(subj)}')">${esc(subj)} (${count}冊)</button>`;
+        }).join('')+
+        `</div>`;
+      const activeBooks=groups[activeWishSubject]||[];
+      const booksHtml=activeBooks.map((b,i)=>{
+        return `<div class="book-card" data-id="${b.id}"
           ondragover="bDo(event,${b.id})" ondragleave="bDl(event)" ondrop="bDrop(event,${b.id})">
           <div class="rank-c">${i+1}</div>
           <div class="book-cover">${b.photo?`<img src="${b.photo}" alt="${esc(b.title)}">`:`<i class="ti ti-book-2" aria-hidden="true"></i>`}</div>
@@ -2392,19 +2462,10 @@ function renderBooks(){
           <div class="drag-h" draggable="true" ondragstart="bDs(event,${b.id})" title="ドラッグして並び替え"><i class="ti ti-grip-vertical" aria-hidden="true"></i></div>
         </div>`;
       }).join('');
-      return `<div class="wish-subject-group">
-        <button class="wish-subject-hdr" type="button" onclick="toggleWishSubject('${esc(subj)}')">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span class="bdg bdg-sky" style="font-size:12px;padding:3px 9px;">${esc(subj)}</span>
-            <span style="font-size:13px;color:var(--ink3);font-weight:600;">(${books.length}冊)</span>
-          </div>
-          <i class="ti ${chevron}" aria-hidden="true"></i>
-        </button>
-        <div class="wish-subject-body" style="display:${isExpanded?'block':'none'};">
-          ${booksHtml}
-        </div>
-      </div>`;
-    }).join('');
+      list.innerHTML=tabsHtml+`<div class="wish-subject-books">${booksHtml}</div>`;
+    } else {
+      list.innerHTML=`<div class="empty"><i class="ti ti-books" aria-hidden="true"></i><div class="empty-t">購入予定の参考書がまだありません</div></div>`;
+    }
   } else {
     list.innerHTML=filtered.map((b,i)=>{
       const units=b.units||[];
@@ -2534,6 +2595,181 @@ function setupTouchDrag(){
 ══════════════════════════════════════ */
 load();
 renderDash();
+
+/* ══════════════════════════════════════
+   OTP  (TOTP – RFC 6238 / HOTP RFC 4226)
+══════════════════════════════════════ */
+
+// Base32 decoder
+function b32decode(s){
+  const alpha='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  s=s.toUpperCase().replace(/=+$/,'').replace(/\s/g,'');
+  let bits=0,val=0;
+  const bytes=[];
+  for(const c of s){
+    const idx=alpha.indexOf(c);
+    if(idx<0)continue;
+    val=(val<<5)|idx;
+    bits+=5;
+    if(bits>=8){bytes.push((val>>>(bits-8))&0xff);bits-=8;}
+  }
+  return new Uint8Array(bytes);
+}
+
+async function getTOTP(secret,digits=6){
+  const now=Math.floor(Date.now()/1000);
+  const counter=Math.floor(now/30);
+  const keyBytes=b32decode(secret);
+  if(!keyBytes.length)return null;
+  const key=await crypto.subtle.importKey(
+    'raw',keyBytes,{name:'HMAC',hash:'SHA-1'},false,['sign']
+  );
+  const buf=new ArrayBuffer(8);
+  const view=new DataView(buf);
+  // write counter as big-endian 64-bit
+  view.setUint32(0,Math.floor(counter/0x100000000),false);
+  view.setUint32(4,counter>>>0,false);
+  const sig=new Uint8Array(await crypto.subtle.sign('HMAC',key,buf));
+  const offset=sig[19]&0x0f;
+  const code=((sig[offset]&0x7f)<<24|(sig[offset+1]&0xff)<<16|(sig[offset+2]&0xff)<<8|(sig[offset+3]&0xff))%(10**digits);
+  return String(code).padStart(digits,'0');
+}
+
+function otpSecsLeft(){return 30-(Math.floor(Date.now()/1000)%30);}
+
+let _otpTick=null;
+function startOtpTick(){
+  if(_otpTick)return;
+  _otpTick=setInterval(()=>{
+    tickOtpCards();
+  },1000);
+  tickOtpCards();
+}
+function stopOtpTick(){
+  if(_otpTick){clearInterval(_otpTick);_otpTick=null;}
+}
+
+async function tickOtpCards(){
+  const secs=otpSecsLeft();
+  const pct=secs/30;
+  const r=24;const circ=2*Math.PI*r;
+  document.querySelectorAll('.otp-card').forEach(async card=>{
+    const id=parseInt(card.dataset.id);
+    const acc=S.otpAccounts.find(a=>a.id===id);
+    if(!acc)return;
+    // code
+    const codeEl=card.querySelector('.otp-code');
+    const secsEl=card.querySelector('.otp-secs');
+    if(codeEl&&!codeEl.classList.contains('copied')){
+      try{
+        const code=await getTOTP(acc.secret,acc.digits||6);
+        if(code){
+          // format with space in middle for readability
+          const d=acc.digits||6;
+          const half=Math.floor(d/2);
+          codeEl.textContent=code.slice(0,half)+' '+code.slice(half);
+        }else{codeEl.textContent='ERROR';}
+      }catch(e){codeEl.textContent='ERROR';}
+    }
+    if(secsEl)secsEl.textContent=`残り ${secs}秒`;
+    // ring
+    const fg=card.querySelector('.otp-ring-fg');
+    if(fg){
+      fg.style.strokeDasharray=circ;
+      fg.style.strokeDashoffset=circ*(1-pct);
+      // colour: green→amber→red
+      const colour=secs>10?'url(#otpGrad)':secs>5?'#D88716':'#D84545';
+      fg.style.stroke=colour;
+    }
+  });
+}
+
+function toggleOtpForm(){
+  const f=document.getElementById('addOtpForm');
+  if(!f.classList.contains('open')){
+    f.classList.add('open');
+    ['otpName','otpSecret','otpIssuer'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    document.getElementById('otpDigits').value='6';
+    setTimeout(()=>document.getElementById('otpName').focus(),50);
+  }else closeOtpForm();
+}
+function closeOtpForm(){document.getElementById('addOtpForm').classList.remove('open');}
+
+function saveOtpAccount(){
+  const name=document.getElementById('otpName').value.trim();
+  const secret=document.getElementById('otpSecret').value.trim().replace(/\s/g,'');
+  if(!name){document.getElementById('otpName').focus();return;}
+  if(!secret){document.getElementById('otpSecret').focus();return;}
+  S.otpAccounts.push({
+    id:Date.now(),
+    name,
+    secret,
+    issuer:document.getElementById('otpIssuer').value.trim(),
+    digits:parseInt(document.getElementById('otpDigits').value)||6
+  });
+  save();closeOtpForm();renderOtp();tickOtpCards();
+}
+
+function deleteOtpAccount(id){
+  if(!confirm('このアカウントを削除しますか？'))return;
+  S.otpAccounts=S.otpAccounts.filter(a=>a.id!==id);
+  save();renderOtp();
+}
+
+function copyOtp(id){
+  const card=document.querySelector(`.otp-card[data-id="${id}"]`);
+  if(!card)return;
+  const codeEl=card.querySelector('.otp-code');
+  const raw=(codeEl.textContent||'').replace(/\s/g,'');
+  if(!raw||raw==='ERROR')return;
+  navigator.clipboard.writeText(raw).catch(()=>{});
+  codeEl.classList.add('copied');
+  showOtpToast('コードをコピーしました！');
+  setTimeout(()=>{codeEl.classList.remove('copied');tickOtpCards();},1200);
+}
+
+function showOtpToast(msg){
+  let t=document.getElementById('otpToast');
+  if(!t){t=document.createElement('div');t.id='otpToast';t.className='otp-copied-toast';document.body.appendChild(t);}
+  t.textContent=msg;
+  t.classList.add('show');
+  clearTimeout(t._tid);
+  t._tid=setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+function renderOtp(){
+  const el=document.getElementById('otpList');
+  const countEl=document.getElementById('otpCount');
+  const n=S.otpAccounts.length;
+  if(countEl)countEl.textContent=n+'件のアカウント';
+  if(!n){
+    el.innerHTML=`<div class="empty"><i class="ti ti-lock" aria-hidden="true"></i><div class="empty-t">アカウントがまだありません</div><div class="empty-s">「アカウントを追加」からシークレットキーを入力してください</div></div>`;
+    return;
+  }
+  // SVG gradient def (injected once)
+  const gradDef=`<svg width="0" height="0" style="position:absolute"><defs><linearGradient id="otpGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1768F2"/><stop offset="100%" stop-color="#4387FF"/></linearGradient></defs></svg>`;
+  const r=24,circ=2*Math.PI*r;
+  el.innerHTML=gradDef+S.otpAccounts.map(acc=>{
+    return `<div class="otp-card" data-id="${acc.id}">
+      <div class="otp-ring-wrap">
+        <svg class="otp-ring" width="56" height="56" viewBox="0 0 56 56">
+          <circle class="otp-ring-bg" cx="28" cy="28" r="${r}"/>
+          <circle class="otp-ring-fg" cx="28" cy="28" r="${r}" stroke-dasharray="${circ}" stroke-dashoffset="${circ}"/>
+        </svg>
+      </div>
+      <div class="otp-body">
+        <div class="otp-name">${esc(acc.name)}</div>
+        ${acc.issuer?`<div class="otp-issuer">${esc(acc.issuer)}</div>`:''}
+        <div class="otp-code" onclick="copyOtp(${acc.id})" title="クリックでコピー">------</div>
+        <div class="otp-secs">読み込み中…</div>
+      </div>
+      <div class="otp-actions">
+        <button class="btn btn-s" onclick="copyOtp(${acc.id})" title="コピー"><i class="ti ti-copy" aria-hidden="true"></i></button>
+        <button class="btn btn-s btn-d" onclick="deleteOtpAccount(${acc.id})" title="削除"><i class="ti ti-trash" aria-hidden="true"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+}
 </script>
 </body>
 </html>
